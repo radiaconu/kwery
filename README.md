@@ -12,7 +12,7 @@ Cloud-based
 0.0
 
 ### How do I get set up? ###
-
+*not yet usable*
 * Summary of set up
 * Configuration
 * Dependencies
