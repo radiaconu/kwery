@@ -4,8 +4,7 @@ This README would normally document whatever steps are necessary to get your app
 
 ### What is this repository for? ###
 
-* Quick summary
-Kwery. Scalable reverse geocoding
+* Kwery. Scalable reverse geocoding
 Cloud-based
 
 * Version
