@@ -11,13 +11,17 @@ Cloud-based
 0.0
 
 ### How do I get set up? ###
-*not yet usable*
 
 * Summary of set up
 * Configuration
 * Dependencies
 * Database configuration
 * How to run tests
+```
+#!bash
+$python disp.py
+$python proxy.py
+```
 * Deployment instructions
 
 ### Who do I talk to? ###
