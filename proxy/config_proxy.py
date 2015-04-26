@@ -15,7 +15,7 @@ import sys
 sys.path.append('..')
 from templates.config import Config
 
-class ConfigDisp(Config):
+class ConfigProxy(Config):
     def __init__(self, _file = 'configProxyDefault.cfg'):
         
         from ConfigParser import ConfigParser
@@ -26,4 +26,7 @@ class ConfigDisp(Config):
         assert 'Network' in  parser.sections(), 'No network section in %s file'%_file
         self.connectDispAddr = parser.get('Network', 'connectDispAddr')
         self.connectDispPort = parser.getint('Network', 'connectDispPort')
+        
+        self.listenLeafAddr = parser.get('Network', 'listenLeafAddr')
+        self.listenLeafPort = parser.getint('Network', 'listenLeafPort')
         

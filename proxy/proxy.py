@@ -12,28 +12,43 @@ Connects to the Disp
 
 TODO: everything
 """
-from twisted.internet.protocol import DatagramProtocol
 from twisted.internet import reactor
-import json
 from config_proxy import ConfigProxy
+from proxy2disp import Proxy2Disp
+from proxy2leaf import Proxy2Leaf
 
-class Proxy2Node(DatagramProtocol):
-    def datagramReceived(self, _msg, (host, _port)):
-        msg = json.loads(_msg)
-        getattr(self, 'from_proxy_'+msg[0])(*msg[1:])
+import sys
+sys.path.append('..')
+from templates.runnable import Runnable
 
-class Proxy:
+class Proxy(Runnable):
     def __init__(self, _config_file='configProxyDefault.cfg'):
-        self.config = ConfigProxy(_file=_config_file)
-        self.objects = dict()
-    
-    def run(self):
-        # listening for Nodes
-        reactor.listenUDP(self.config.listenNodePort, Proxy2Node())
-        print "Listening for Nodes on", (self.config.listenNodeAddr, self.config.listenNodePort)
+        # singleton 
         
+        self.config = ConfigProxy(_file=_config_file)
+    
+    def run(self):    
+        # effectively open connections
+        self.proxy2disp = Proxy2Disp(self)
+        #self.proxy2leaf = Proxy2Leaf(self)
+        #self.proxy2proxy = Proxy2Proxy(self)
+        
+        # data management
+        self.objects = dict()
+        # listening for Leaves
+        #reactor.listenUDP(self.config.listenLeafPort, self.proxy2leaf)
+        #print "Listening for Leaves on", (self.config.listenLeafAddr, self.config.listenLeafPort)
+    
+    def generate_points(self):
+        # generate some points:
+        print "generate some points "
+        from random import random
+        for _id in range(100):
+            self.proxy2disp.send_insert(_id, (random(), random()))
+        print "done"
         
 if __name__ == '__main__':
     proxy = Proxy()
     proxy.run()
+    proxy.generate_points()
     reactor.run()
