@@ -4,17 +4,11 @@ Created on Fri Apr 24 15:09:30 2015
 
 @author: Raluca Diaconu (diaconu.raluca@gmail.com)
 """
-
-from twisted.internet.protocol import DatagramProtocol
-import json
-
-class Node2Disp(DatagramProtocol):    
-    def __init__(self):
-        self.rcvd_msgs = 0
     
-    def send_print(self, _msg):
-        self.udpsocket.sendto(json.dumps(_msg),(self.addr, self.port))
-        
+from config import Config
+from leaf2disp import Leaf2Disp
+from leaf2proxy import Leaf2Proxy
+
 import sys
 sys.path.append('..')
 from templates.runnable import Runnable
@@ -24,16 +18,15 @@ class Node(Runnable):
         self.config = _config
     
     def run(self):
-        print "running node on", self.config.addr, self.config.port
+        self.leaf2proxy = Leaf2Proxy()
+        self.leaf2disp = Leaf2Disp()
         
 
 
 if __name__ == '__main__':
     #from twisted.internet import reactor
-    from config import Config
     localconfig = Config()
 
-    import socket
     import time
     
     _msg = ['print', 'yo']
@@ -43,9 +36,4 @@ if __name__ == '__main__':
             #udpsocket.sendto(json.dumps(_msg),(localconfig.connectDispAddr, localconfig.connectDispPort+1))
             udpsocket.sendto(json.dumps(_msg),(localconfig.connectDispAddr, localconfig.connectDispPort+1))
         
-    
-    #
-    #node = Rect()
-    #node.run
-    
-    #reactor.run()
+    reactor.run()

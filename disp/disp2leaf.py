@@ -8,27 +8,30 @@ Diaspatcher2leaf communication: ***one 2 many***
 
 TODO: everything
 """
-
-import sys
-sys.path.append('..')
 from templates.node2node import Node2Node, Node2Node_from, Node2Node_to
 
-class Disp2Leaf(Node2Node):
-    
-    def __init__(self, _disp):
-        # listening for Leaves
-        reactor.listenUDP(self.config.listenLeafPort, self.disp2leaf._from)
-        print "Listening for Leaves on", (self.config.listenLeafAddr, self.config.listenLeafPort)
-        
-        self.disp = _disp
-        self._from = Disp2Leaf_from()
-        self._to = Disp2Leaf_to()
-
 class Disp2Leaf_to(Node2Node_to):
-    pass
+    
+    def received_update(self, _host, _port, _id, _value):
+        if not self._all.get( (_host, _port) ):
+            print "new leaf"
+        self._all[(_host, _port)] = _value
+        
 
 class Disp2Leaf_from(Node2Node_from):
-    pass
+    def send_insert(self, _id, _value):
+        msg = ('insert', self._to_addr, self._to_port, _id, _value)
+        self._send(msg, (self._to_addr, self._to_port))
+        
+        
+class Disp2Leaf(Node2Node, Disp2Leaf_from, Disp2Leaf_to):
+    def __init__(self, _disp):       
+        self.disp = _disp
+        self._from_addr = _disp.config.listenLeafAddr # unimportant for now
+        self._from_port = _disp.config.listenLeafPort
+         
+        self._all = dict()
+        Node2Node.__init__(self)
 #
 #class Disp2Leaf(Node2Node):
 #    

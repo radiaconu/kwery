@@ -32,11 +32,11 @@ class Disp(Runnable):
     def run(self):
         # effectively open connections
         self.disp2proxy = Disp2Proxy(self)
-        #self.disp2leaf = Disp2Leaf(self)
+        self.disp2leaf = Disp2Leaf(self)
         
         # data management
-        self.leaves = dict()
-        self.proxies = dict()
+        #self.leaves = dict()
+        #self.proxies = dict()
         
         
         
