@@ -18,12 +18,10 @@ class Node2Node_to(object):
     """ All sending functions ẗo all corresponding Node instances """
     
     def __init__(self):
-        print "udpsocket"
         self.udpsocket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
         
     def _send(self, data, (_addr, _port)):
         #self.sent += 1
-        print data
         self.udpsocket.sendto(json.dumps(data),(_addr, _port))
         
         

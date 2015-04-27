@@ -49,8 +49,9 @@ class Disp2Peer(Node2Node, Disp2Peer_from, Disp2Peer_to):
         self._from_addr = _disp.config.listenPeerAddr # unimportant for now
         self._from_port = _disp.config.listenPeerPort
          
-        self._peers = dict()
+        self._peers = dict() # (_addr, _port) -> value
         Node2Node.__init__(self)
+        
 #
 #class Disp2Peer(Node2Node):
 #    

@@ -17,13 +17,27 @@ from disp2peer import Disp2Peer
 from disp2proxy import Disp2Proxy
 
 from twisted.internet import reactor
-from twisted.internet.task import LoopingCall
 
 import sys
 sys.path.append('..')
 from templates.runnable import Runnable
+from templates.simulator import Simulator
+#from templates.events import EventType
 
+class Event(object):
+    def __init__(self, **kw):
+        assert kw.has_key('type'), 'Event must have a type'
+        self._dict = kw
+
+    def __getattr__(self, key):
+        return self._dict[key]
+
+class EventType:
+    InsertObject = 0
+    UpdatePeer = 1
+    
 class Disp(Runnable):
+    
     def __init__(self, _config_file='configDispDefault.cfg'):
         # singleton
         Disp.DISP = self
@@ -31,9 +45,18 @@ class Disp(Runnable):
         self.config = ConfigDisp(_file=_config_file)
         
     def run(self):
+        
         # effectively open connections
         self.disp2proxy = Disp2Proxy(self)
         self.disp2peer = Disp2Peer(self)
+        
+        # the event-driven simulator
+        self.sim = Simulator()
+        handlers = {
+            EventType.InsertObject :    self.disp2peer.select_and_insert,
+            EventType.UpdatePeer :      self.disp2peer.received_update,
+        }
+        self.sim.setHandler(lambda event: handlers.get(event.type, None)(event))
         
         
         # data management
