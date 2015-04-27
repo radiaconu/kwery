@@ -24,8 +24,8 @@ class ConfigDisp(Config):
         parser.read(_file)
         
         assert 'Network' in  parser.sections(), 'No network section in %s file'%_file
-        self.listenLeafAddr = parser.get('Network', 'listenLeafAddr')
-        self.listenLeafPort = parser.getint('Network', 'listenLeafPort')
+        self.listenPeerAddr = parser.get('Network', 'listenPeerAddr')
+        self.listenPeerPort = parser.getint('Network', 'listenPeerPort')
         
         self.listenProxyAddr = parser.get('Network', 'listenProxyAddr')
         self.listenProxyPort = parser.getint('Network', 'listenProxyPort')

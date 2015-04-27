@@ -13,7 +13,7 @@ TODO: separate Disp from Coord
 """
 
 from config_disp import ConfigDisp
-from disp2leaf import Disp2Leaf
+from disp2peer import Disp2Peer
 from disp2proxy import Disp2Proxy
 
 from twisted.internet import reactor
@@ -32,10 +32,10 @@ class Disp(Runnable):
     def run(self):
         # effectively open connections
         self.disp2proxy = Disp2Proxy(self)
-        self.disp2leaf = Disp2Leaf(self)
+        self.disp2peer = Disp2Peer(self)
         
         # data management
-        #self.leaves = dict()
+        #self.peers = dict()
         #self.proxies = dict()
         
         

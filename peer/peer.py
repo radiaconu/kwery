@@ -6,8 +6,8 @@ Created on Fri Apr 24 15:09:30 2015
 """
     
 from config import Config
-from leaf2disp import Leaf2Disp
-from leaf2proxy import Leaf2Proxy
+from peer2disp import Peer2Disp
+from peer2proxy import Peer2Proxy
 
 import sys
 sys.path.append('..')
@@ -18,8 +18,8 @@ class Node(Runnable):
         self.config = _config
     
     def run(self):
-        self.leaf2proxy = Leaf2Proxy()
-        self.leaf2disp = Leaf2Disp()
+        self.peer2proxy = Peer2Proxy()
+        self.peer2disp = Peer2Disp()
         
 
 

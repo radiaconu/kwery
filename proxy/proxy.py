@@ -15,7 +15,7 @@ TODO: everything
 from twisted.internet import reactor
 from config_proxy import ConfigProxy
 from proxy2disp import Proxy2Disp
-from proxy2leaf import Proxy2Leaf
+from proxy2peer import Proxy2Peer
 
 import sys
 sys.path.append('..')
@@ -30,14 +30,14 @@ class Proxy(Runnable):
     def run(self):    
         # effectively open connections
         self.proxy2disp = Proxy2Disp(self)
-        #self.proxy2leaf = Proxy2Leaf(self)
+        #self.proxy2peer = Proxy2Peer(self)
         #self.proxy2proxy = Proxy2Proxy(self)
         
         # data management
         self.objects = dict()
         # listening for Leaves
-        #reactor.listenUDP(self.config.listenLeafPort, self.proxy2leaf)
-        #print "Listening for Leaves on", (self.config.listenLeafAddr, self.config.listenLeafPort)
+        #reactor.listenUDP(self.config.listenPeerPort, self.proxy2peer)
+        #print "Listening for Leaves on", (self.config.listenPeerAddr, self.config.listenPeerPort)
     
     def generate_points(self):
         # generate some points:

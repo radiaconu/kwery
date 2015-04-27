@@ -27,6 +27,6 @@ class ConfigProxy(Config):
         self.connectDispAddr = parser.get('Network', 'connectDispAddr')
         self.connectDispPort = parser.getint('Network', 'connectDispPort')
         
-        self.listenLeafAddr = parser.get('Network', 'listenLeafAddr')
-        self.listenLeafPort = parser.getint('Network', 'listenLeafPort')
+        self.listenPeerAddr = parser.get('Network', 'listenPeerAddr')
+        self.listenPeerPort = parser.getint('Network', 'listenPeerPort')
         
