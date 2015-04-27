@@ -17,6 +17,7 @@ from disp2peer import Disp2Peer
 from disp2proxy import Disp2Proxy
 
 from twisted.internet import reactor
+from twisted.internet.task import LoopingCall
 
 import sys
 sys.path.append('..')
@@ -34,9 +35,10 @@ class Disp(Runnable):
         self.disp2proxy = Disp2Proxy(self)
         self.disp2peer = Disp2Peer(self)
         
+        
         # data management
-        #self.peers = dict()
-        #self.proxies = dict()
+        self.peers = dict()
+        #self.proxies = dict() # not used, proxies are not stored 
         
         
         

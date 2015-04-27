@@ -19,7 +19,7 @@ class Peer2Proxy(Node2Node):
     def __init__(self, _peer):
         self.peer = _peer
         
-        self._from_addr = _peer.config.listenDispAddr 
-        self._from_port = _peer.config.listenDispPort
+        self._from_addr = _peer.config.listenProxyAddr 
+        self._from_port = _peer.config.listenProxyPort
         
         Node2Node.__init__(self)

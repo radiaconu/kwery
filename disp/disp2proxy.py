@@ -4,7 +4,9 @@ Created on Sat Apr 25 13:44:17 2015
 
 @author: Raluca Diaconu (diaconu.raluca@gmail.com)
 
-Diaspatcher2Proxy communication: ***one 2 many, receive only***
+Diaspatcher2Proxy communication: 
+ * one 2 many
+ * uni-directional, only receive inserts & queries 
 """
 
 from templates.node2node import Node2Node, Node2Node_from

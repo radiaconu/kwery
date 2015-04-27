@@ -15,8 +15,8 @@ import sys
 sys.path.append('..')
 from templates.config import Config
 
-class ConfigDisp(Config):
-    def __init__(self, _file = 'configNodeDefault.cfg'):
+class ConfigPeer(Config):
+    def __init__(self, _file='configNodeDefault.cfg'):
         
         from ConfigParser import ConfigParser
         
@@ -27,6 +27,12 @@ class ConfigDisp(Config):
         self.connectDispAddr = parser.get('Network', 'connectDispAddr')
         self.connectDispPort = parser.getint('Network', 'connectDispPort')
         
-        #self.connectCoordAddr = parser.get('Network', 'connectCoordAddr')
-        #self.connectCoordPort = parser.get('Network', 'connectCoordPort')
+        self.listenDispAddr = parser.get('Network', 'listenDispAddr')
+        self.listenDispPort = parser.getint('Network', 'listenDispPort')
+        
+        self.listenProxyAddr = parser.get('Network', 'listenProxyAddr')
+        self.listenProxyPort = parser.getint('Network', 'listenProxyPort')
+        
+        # Other variales. SYSTEM GLOBAL 
+        self.UPDATE_INTERVAL = 2
         

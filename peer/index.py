@@ -12,7 +12,7 @@ TODO: define an interface and change file names
 """
 
 class LocalIndex(object):
-    def __init__(self, _dim):
+    def __init__(self, _dim=2):
         self.dim = _dim
         self.objects = dict()
         
@@ -51,10 +51,16 @@ class LocalIndex(object):
         _max_value[0] = max(self.objects.values(), key=lambda o: o[0])
         _max_value[1] = max(self.objects.values(), key=lambda o: o[1])
         
-        if  _value[0] < _min_value[0] or\
-            _value[1] < _min_value[1] or\
+        if  _value[0] < _min_value[0] or \
+            _value[1] < _min_value[1] or \
             _value[0] > _max_value[0] or \
             _value[1] > _max_value[1]:
                 return False
         
         return True
+    
+    def aggregate(self):
+        _value = (sum((v[0] for v in self.objects.values())),sum((v[1] for v in self.objects.values())))
+        if self.objects:
+            _value = (_value[0]/len(self.objects), _value[1]/len(self.objects))
+        return _value

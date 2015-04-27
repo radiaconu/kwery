@@ -4,7 +4,9 @@ Created on Sat Apr 25 13:48:06 2015
 
 @author: Raluca Diaconu (diaconu.raluca@gmail.com)
 
-Diaspatcher2Peer communication: ***one 2 many***
+Diaspatcher2Peer communication:
+ * one 2 many
+ * bi-directional
 
 TODO: everything
 """
@@ -12,10 +14,11 @@ from templates.node2node import Node2Node, Node2Node_from, Node2Node_to
 
 class Disp2Peer_to(Node2Node_to):
     
-    def received_update(self, _host, _port, _id, _value):
-        if not self._all.get( (_host, _port) ):
-            print "new peer"
-        self._all[(_host, _port)] = _value
+    def received_update(self, (_addr, _port), _value):
+        if not self._peers.get( (_addr, _port) ):
+            print "new peer",
+        print "update", (_addr, _port), _value
+        self._peers[(_addr, _port)] = _value
         
 
 class Disp2Peer_from(Node2Node_from):
@@ -25,12 +28,15 @@ class Disp2Peer_from(Node2Node_from):
         
         
 class Disp2Peer(Node2Node, Disp2Peer_from, Disp2Peer_to):
+    class PeerList:
+        pass
+    
     def __init__(self, _disp):       
         self.disp = _disp
         self._from_addr = _disp.config.listenPeerAddr # unimportant for now
         self._from_port = _disp.config.listenPeerPort
          
-        self._all = dict()
+        self._peers = dict()
         Node2Node.__init__(self)
 #
 #class Disp2Peer(Node2Node):

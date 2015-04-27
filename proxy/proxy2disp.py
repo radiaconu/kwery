@@ -5,6 +5,8 @@ Created on Sat Apr 25 11:39:27 2015
 @author: Raluca Diaconu (diaconu.raluca@gmail.com)
 
 Proxy2Diaspatcher communication
+ * one 2 one
+ * uni-directional: send insert and queries
 """
 import sys
 sys.path.append('..')
