@@ -23,7 +23,7 @@ class Node2Node_to(object):
         
     def _send(self, data, (_addr, _port)):
         #self.sent += 1
-        print data, (_addr, _port)
+        print data
         self.udpsocket.sendto(json.dumps(data),(_addr, _port))
         
         
@@ -39,15 +39,15 @@ class Node2Node_from(DatagramProtocol):
         
     def datagramReceived(self, _msg, (_addr, _port)):
         msg = json.loads(_msg)
-        getattr(self, 'received_'+msg[0])((_addr, _port), *msg[1:])
+        getattr(self, 'received_'+msg[0])(*msg[1:])
         
         
 class Node2Node(Node2Node_to, Node2Node_from):
     """ A common, unified interface for bi-directional communication """
     
     def __init__(self):
-        if hasattr(self,'_to_port'):
-            Node2Node_to.__init__(self)
+        #if hasattr(self,'_to_port'):
+        Node2Node_to.__init__(self)
         if hasattr(self,'_from_port'):
             Node2Node_from.__init__(self)
 

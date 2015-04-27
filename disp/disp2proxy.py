@@ -13,12 +13,9 @@ from templates.node2node import Node2Node, Node2Node_from
 
 class Disp2Proxy_from(Node2Node_from):
     
-    def received_insert(self, _host, _port, _id, _value):
-        if not self._all.get( (_host, _port) ):
-            print "new proxy"
-            self._all[(_host, _port)] = _value
-            
-        print "insert", _host, _port, _id, _value
+    def received_insert(self, _id, _value, _proxy):
+        """ Structure: 'insert', _id, _value, (_proxy_addr, _proxy_port) """
+        self.disp.disp2peer.select_and_insert(_id, _value, _proxy)
         
         
 class Disp2Proxy(Node2Node, Disp2Proxy_from):

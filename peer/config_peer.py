@@ -10,6 +10,8 @@ Required correctly formatted input file.
 Default value: 'configNodeDefault.cfg'
 
 TODO: Automatic config file generation
+TODO: automatic port selection if it's not working
+TODO: check if listen ports are open
 """
 import sys
 sys.path.append('..')

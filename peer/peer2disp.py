@@ -13,8 +13,9 @@ from templates.node2node import Node2Node, Node2Node_to, Node2Node_from
 
 class Peer2Disp_to(Node2Node_to):
     def send_update(self):
+        """ Structure: 'update', (_addr, _port), _value """
         _value = self.peer.index.aggregate()
-        msg = ('update', _value)
+        msg = ('update', (self.peer.config.listenDispAddr, self.peer.config.listenDispPort), _value)
         self._send(msg, (self._to_addr, self._to_port))
         
     def send_transfer(self, _id, _value):
@@ -23,8 +24,10 @@ class Peer2Disp_to(Node2Node_to):
     
       
 class Peer2Disp_from(Node2Node_from):
-    def receive_insert(self, _id, _value, (_addr, _port)):
-        self.peer.index.insert(_id, _value)
+    def received_insert(self, _id, _value, (_proxy_addr, _proxy_port)):
+        """ Structure: 'insert', _id, _value, (_proxy_addr, _proxy_port) """
+        print "receive_insert", _id
+        self.peer.index.put(_id, _value)
 
 
 class Peer2Disp(Node2Node, Peer2Disp_to, Peer2Disp_from):

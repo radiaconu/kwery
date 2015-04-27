@@ -16,7 +16,8 @@ from templates.node2node import Node2Node, Node2Node_to
 
 class Proxy2Disp_to(Node2Node_to):
     def send_insert(self, _id, _value):
-        msg = ('insert', self._to_addr, self._to_port, _id, _value)
+        """ Structure: 'insert', _id, _value, (_proxy_addr, _proxy_port) """
+        msg = ('insert', _id, _value, (self.proxy.config.listenPeerAddr, self.proxy.config.listenPeerPort))
         self._send(msg, (self._to_addr, self._to_port))
         
 
