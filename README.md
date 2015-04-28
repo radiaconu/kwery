@@ -20,6 +20,7 @@ Cloud-based
 ```
 #!bash
 $python disp.py
+$python peer.py
 $python proxy.py
 ```
 * Deployment instructions
