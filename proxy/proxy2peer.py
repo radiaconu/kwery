@@ -26,7 +26,7 @@ class Proxy2Peer_from(Node2Node_from):
 class Proxy2Peer_to(Node2Node_to):
     def send_put(self, _id, _value, _peer):
         """ Structure: 'put', _id, _value, (_proxy_addr, _proxy_port) """
-        msg = ('put', _id, _value, self.proxy.config.listenPeerAddr, self.proxy.config.listenPeerPort)
+        msg = ('put', _id, _value, self.host)
         self._send(msg, _peer)
     
         
@@ -36,5 +36,5 @@ class Proxy2Peer(Node2Node, Proxy2Peer_from, Proxy2Peer_to):
         
         self._from_addr = _proxy.config.listenPeerAddr
         self._from_port = _proxy.config.listenPeerPort
-        
+        self.host = (self._from_addr, self._from_port)
         Node2Node.__init__(self)

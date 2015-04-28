@@ -16,7 +16,7 @@ class Peer2Proxy_to(Node2Node_to):
     
     def send_notification(self, _ids, _proxy_host):
         """ Structure: 'notification', _ids, (self.peer.config.listenProxyAddr, self.peer.config.listenProxyPort) """
-        msg = ('notification', _ids, (self._from_addr, self._from_port))
+        msg = ('notification', _ids, self.host)
         print msg, _proxy_host
         self._send(msg, _proxy_host)
 
@@ -32,5 +32,6 @@ class Peer2Proxy(Node2Node, Peer2Proxy_from, Peer2Proxy_to):
         
         self._from_addr = _peer.config.listenProxyAddr 
         self._from_port = _peer.config.listenProxyPort
+        self.host = (self._from_addr, self._from_port)
         
         Node2Node.__init__(self)
