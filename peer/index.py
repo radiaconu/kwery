@@ -37,30 +37,41 @@ class LocalIndex(object):
         """ Removes an object if it exists """
         if self.objects.get(_id):
             self.objects.pop(_id)
-        
-    def outside(self, _value):
-        """ Checks if _value is outside the covered area. """
-        
-        if len(self.objects)==0:
-            return False
+     
+    def barycenter(self):
+        """ All indexed points barycenter """
+        _value = (sum((v[0] for v in self.objects.values())),sum((v[1] for v in self.objects.values())))
+        if self.objects:
+            _value = (_value[0]/len(self.objects), _value[1]/len(self.objects))
+        return _value
+    
+    def coverage(self):
+        """ Returns the covered area as a tuple (_min_value, _max_value) """
         _min_value = (0,0)
         _max_value = (0,0)
-        _min_value[0] = min(self.objects.values(), key=lambda o: o[0])
-        _min_value[1] = min(self.objects.values(), key=lambda o: o[1])
         
-        _max_value[0] = max(self.objects.values(), key=lambda o: o[0])
-        _max_value[1] = max(self.objects.values(), key=lambda o: o[1])
+        if self.objects:
+            _min_value=(min(self.objects.values(), key=lambda o: o[0]), \
+                        min(self.objects.values(), key=lambda o: o[1]))
+            
+            _max_value=(max(self.objects.values(), key=lambda o: o[0]),\
+                        max(self.objects.values(), key=lambda o: o[1]))
+        
+        return (_min_value, _max_value)
+    
+    def is_covered(self, _value):
+        """ Checks if _value is covered by the current area. """
+        
+        if len(self.objects)==0:
+            return True
+        
+        _min_value, _max_value = self.coverage()
         
         if  _value[0] < _min_value[0] or \
             _value[1] < _min_value[1] or \
             _value[0] > _max_value[0] or \
             _value[1] > _max_value[1]:
-                return False
+                return True
         
-        return True
+        return False
     
-    def aggregate(self):
-        _value = (sum((v[0] for v in self.objects.values())),sum((v[1] for v in self.objects.values())))
-        if self.objects:
-            _value = (_value[0]/len(self.objects), _value[1]/len(self.objects))
-        return _value

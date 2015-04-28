@@ -24,21 +24,22 @@ from templates.runnable import Runnable
 class Proxy(Runnable):
     def __init__(self, _config_file='configProxyDefault.cfg'):
         # singleton 
-        
+        self.PROXY = self
         self.config = ConfigProxy(_file=_config_file)
     
-    def run(self):    
+    def run(self): 
         # effectively open connections
         self.proxy2disp = Proxy2Disp(self)
-        #self.proxy2peer = Proxy2Peer(self)
+        self.proxy2peer = Proxy2Peer(self)
         #self.proxy2proxy = Proxy2Proxy(self)
         
         # data management
         self.objects = dict()
-        # listening for Leaves
-        #reactor.listenUDP(self.config.listenPeerPort, self.proxy2peer)
-        #print "Listening for Leaves on", (self.config.listenPeerAddr, self.config.listenPeerPort)
+        self.queries = dict() # id -> objects
     
+    def handle_query_answer_peers(self, _query_id, _objects):
+        self.queries[_query_id] = _objects
+        
     def generate_points(self):
         # generate some points:
         print "generate some points "

@@ -10,12 +10,24 @@ Peer2Diaspatcher communication
 """
 from templates.node2node import Node2Node, Node2Node_to, Node2Node_from
 
+class Peer2Disp_from(Node2Node_from):
+    def received_insert(self, _id, _value, _proxy_host):
+        """ Structure: 'insert', _id, _value, (_proxy_addr, _proxy_port) """
+        self.peer.handle_put(_id, _value, _proxy_host)
+        
+    def received_get(self, _query_id, _min_value, _max_value, _proxy_host):
+        """ Structure: 'get', _query_id, _min_value, _max_value, (_proxy_addr, _proxy_port) """
+        self.peer.handle_get(_query_id, _min_value, _max_value, _proxy_host)
+
 
 class Peer2Disp_to(Node2Node_to):
     def send_update(self):
         """ Structure: 'update', (_addr, _port), _value """
-        _value = self.peer.index.aggregate()
-        msg = ('update', (self.peer.config.listenDispAddr, self.peer.config.listenDispPort), _value)
+        coverage = self.peer.index.coverage()
+        barycenter = self.peer.index.barycenter()        
+        #_value = (coverage, barycenter)
+        
+        msg = ('update', coverage, barycenter, (self.peer.config.listenDispAddr, self.peer.config.listenDispPort))
         self._send(msg, (self._to_addr, self._to_port))
         
     def send_transfer(self, _id, _value):
@@ -23,12 +35,6 @@ class Peer2Disp_to(Node2Node_to):
         self._send(msg, (self._to_addr, self._to_port))
     
       
-class Peer2Disp_from(Node2Node_from):
-    def received_insert(self, _id, _value, (_proxy_addr, _proxy_port)):
-        """ Structure: 'insert', _id, _value, (_proxy_addr, _proxy_port) """
-        print "receive_insert", _id
-        self.peer.index.put(_id, _value)
-
 
 class Peer2Disp(Node2Node, Peer2Disp_to, Peer2Disp_from):
     

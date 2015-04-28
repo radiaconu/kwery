@@ -14,31 +14,26 @@ from templates.node2node import Node2Node, Node2Node_from, Node2Node_to
 
 class Disp2Peer_from(Node2Node_from):
 
-    def received_update(self, (_addr, _port), _value):
-        """ Structure: 'update', (_addr, _port), _value """
-        if not self._peers.get( (_addr, _port) ):
-            print "new peer",
-        print "update", (_addr, _port), _value
-        self._peers[(_addr, _port)] = _value
-        
+    def received_update(self, _coverage, _barycenter, _peer_host):
+        """ Structure: 'update', (_peer_addr, _peer_port), _value """
+        self.disp.handle_update_peer(_coverage, _barycenter, _peer_host)     
+    
+    def received_transfer(self, _id, _value, _proxy_host):
+        """ Structure: 'insert', _id, _value, (_proxy_addr, _proxy_port) """
+        self.disp.handle_insert_object(_id, _value, _proxy_host)
+    
 
 class Disp2Peer_to(Node2Node_to):
-    def select_and_insert(self, _id, _value, _proxy):
-        """ Selects and inserts the object to the best peer.
-            TODO: selection function
-        """
-        if not self._peers:
-            return
-         
-        peer = min(self._peers.keys(), key=lambda p: abs(_value[0]-self._peers[p][0])+abs(_value[0]-self._peers[p][0]) )
-        
-        self.send_insert(_id, _value, _proxy, peer)
             
     def send_insert(self, _id, _value, _proxy, _peer):
         """ Structure: 'insert', _id, _value, (_proxy_addr, _proxy_port) """
         msg = ('insert', _id, _value, _proxy)
         self._send(msg, _peer)
-        
+    
+    def send_query(self, _query_id, _min_value, _max_value, _proxy_host, _peer):
+        """ Structure: 'get', _query_id, _min_value, _max_value, (_proxy_addr, _proxy_port) """
+        msg = ('get', _query_id, _min_value, _max_value, _proxy_host)
+        self._send(msg, _peer)
         
 class Disp2Peer(Node2Node, Disp2Peer_from, Disp2Peer_to):
     class PeerList:

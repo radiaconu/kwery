@@ -9,10 +9,15 @@ Peer 2 all Proxy communication. *** one 2 many ***
 from templates.node2node import Node2Node, Node2Node_to, Node2Node_from
 
 class Peer2Proxy_to(Node2Node_to):
-    pass
+    def send_query_answer(self, _query_id, _objects, _proxy_host):
+        """ Structure: 'answer', _query_id, [( _id, _value)] """
+        msg = ('answer', _query_id, _objects)
+        self._send(msg, _proxy_host)
 
 class Peer2Proxy_from(Node2Node_from):
-    pass
+    def received_put(self,_id, _value, _proxy_host):
+        """ Structure: 'put', _id, _value, (_proxy_addr, _proxy_port) """
+        self.peer.handle_put(_id, _value, _proxy_host)
 
 class Peer2Proxy(Node2Node):
     
