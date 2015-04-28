@@ -15,11 +15,11 @@ Cloud-based
 * Summary of set up
 * Configuration
 * Dependencies
-* Database configuration
 * How to run tests
 ```
 #!bash
 $python disp.py
+$python peer.py
 $python proxy.py
 ```
 * Deployment instructions
