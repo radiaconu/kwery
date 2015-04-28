@@ -30,10 +30,10 @@ class Peer2Disp_to(Node2Node_to):
         msg = ('update', coverage, barycenter, (self.peer.config.listenDispAddr, self.peer.config.listenDispPort))
         self._send(msg, (self._to_addr, self._to_port))
         
-    def send_transfer(self, _id, _value):
-        msg = ('transfer',self._to_addr, self._to_port, _id, _value)
+    def send_transfer(self, _id, _value, _proxy_host):
+        """ TODO: To be tested Structure: 'update', (_addr, _port), _value """
+        msg = ('transfer', _id, _value, _proxy_host)
         self._send(msg, (self._to_addr, self._to_port))
-    
       
 
 class Peer2Disp(Node2Node, Peer2Disp_to, Peer2Disp_from):

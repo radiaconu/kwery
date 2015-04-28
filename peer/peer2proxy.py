@@ -13,13 +13,19 @@ class Peer2Proxy_to(Node2Node_to):
         """ Structure: 'answer', _query_id, [( _id, _value)] """
         msg = ('answer', _query_id, _objects)
         self._send(msg, _proxy_host)
+    
+    def send_notification(self, _ids, _proxy_host):
+        """ Structure: 'notification', _ids, (self.peer.config.listenProxyAddr, self.peer.config.listenProxyPort) """
+        msg = ('notification', _ids, (self._from_addr, self._from_port))
+        print msg, _proxy_host
+        self._send(msg, _proxy_host)
 
 class Peer2Proxy_from(Node2Node_from):
     def received_put(self,_id, _value, _proxy_host):
         """ Structure: 'put', _id, _value, (_proxy_addr, _proxy_port) """
         self.peer.handle_put(_id, _value, _proxy_host)
 
-class Peer2Proxy(Node2Node):
+class Peer2Proxy(Node2Node, Peer2Proxy_from, Peer2Proxy_to):
     
     def __init__(self, _peer):
         self.peer = _peer

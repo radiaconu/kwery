@@ -18,6 +18,11 @@ class Proxy2Peer_from(Node2Node_from):
         """ Structure: 'answer', _query_id, [( _id, _value)] """
         self.proxy.handle_query_answer_peers(_query_id, _objects)
     
+    def received_notification(self, _ids, _peer_host):
+        """ Structure: 'notification', _ids, (_peer_addr, _peer_port) """
+        print " here"
+        self.proxy.handle_notification(_ids, _peer_host)
+    
 class Proxy2Peer_to(Node2Node_to):
     def send_put(self, _id, _value, _peer):
         """ Structure: 'put', _id, _value, (_proxy_addr, _proxy_port) """
@@ -29,7 +34,7 @@ class Proxy2Peer(Node2Node, Proxy2Peer_from, Proxy2Peer_to):
     def __init__(self, _proxy):
         self.proxy = _proxy
         
-        self._from_addr = _proxy.config.connectDispAddr
-        self._from_port = _proxy.config.connectDispPort
+        self._from_addr = _proxy.config.listenPeerAddr
+        self._from_port = _proxy.config.listenPeerPort
         
-        self._peers = dict()
+        Node2Node.__init__(self)

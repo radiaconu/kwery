@@ -40,6 +40,7 @@ class Peer(Runnable):
     def handle_put(self, _id, _value, _proxy_host):
         self.index.put(_id, _value)
         self.id2proxy[_id] = _proxy_host
+        self.peer2proxy.send_notification([_id], _proxy_host)
     
     def handle_get(self, _query_id, _min_value, _max_value, _proxy_host):
         result = self.index.get(_min_value, _max_value)

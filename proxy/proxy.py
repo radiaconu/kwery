@@ -35,10 +35,16 @@ class Proxy(Runnable):
         
         # data management
         self.objects = dict()
+        self.id2peer = dict()
         self.queries = dict() # id -> objects
     
     def handle_query_answer_peers(self, _query_id, _objects):
         self.queries[_query_id] = _objects
+    
+    def handle_notification(self, _ids, _peer_host):
+        print "notif", _ids, _peer_host
+        for _id in _ids:
+            self.id2peer[_id] = _peer_host
         
     def generate_points(self):
         # generate some points:
