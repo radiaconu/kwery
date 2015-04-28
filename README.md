@@ -15,7 +15,6 @@ Cloud-based
 * Summary of set up
 * Configuration
 * Dependencies
-* Database configuration
 * How to run tests
 ```
 #!bash
