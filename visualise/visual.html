@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript" src="http://mbostock.github.com/d3/d3.js"></script>
+</head>
+<body>
+    <div id="viz"></div>
+    <script type="text/javascript">
+
+    var globalSVG = d3.select("#viz")
+        .append("svg")
+        .attr("width", 800)
+        .attr("height", 800);    
+
+        //.on("mouseover", function(){d3.select(this).style("fill", "aliceblue");})
+        //.on("mouseout", function(){d3.select(this).style("fill", "white");});
+
+    function Rectangle(_id, _x0, _y0, _x1, _y1, _data){
+
+        this.id = _id;
+
+        this.update = function(_x0, _y0, _x1, _y1, _data){
+            this.x = _x0;
+            this.y = _y0;
+            this.width = _x1-_x0;
+            this.height = _y1-_y0;
+            this.data = _data;
+            this.fill = "steelblue";
+            this.stroke = "red";
+        }
+
+        this.update(_id, _x0, _y0, _x1, _y1, _data);
+
+        this.rect = globalSVG.append("rect")
+            .attr("x",this.x)
+            .attr("y",this.y)
+            .attr("width",this.width)
+            .attr("height",this.height)
+            .style("fill", this.fill)
+            .style("stroke",this.stroke)
+            .style("stroke-width",5)// all
+            .style("opacity", 0.3)// all
+            .attr("rx",2)// all
+            .attr("ry",2);// all
+
+        this.info = globalSVG.append("text")
+            .attr("x", this.x)
+            .attr("y", this.y)
+            .text(this.data)
+            .attr("dy", ".3em"); // all
+
+        this.transition = function(_x0, _y0, _x1, _y1, _data){
+            this.update(_x0, _y0, _x1, _y1, _data);
+            this.rect.transition()
+                .attr("x",this.x)
+                .attr("y",this.y)
+                .attr("width",this.width)
+                .attr("height",this.height)
+                .duration(2000); //2s all
+        }
+    }
+
+    var rects = new Array();
+
+    for (var i = 0; i <= 10; i++) {
+        rects[i] = new Rectangle(i, i*30, i*30, i*30+40, i*30+40, 'some data');
+        
+
+    }
+
+    for (var i = 0; i <= 10; i++) {
+        rects[i].transition(i*30, i*30, i*30+40, 400, 'some data');
+    }
+
+    </script>
+</body>
+</html>
