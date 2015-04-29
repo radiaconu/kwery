@@ -38,6 +38,7 @@ class Peer(Runnable):
         self.loop_send_update.start(self.config.UPDATE_INTERVAL)
 
     def handle_put(self, _id, _value, _proxy_host):
+        print "put", _id
         self.index.put(_id, _value)
         self.id2proxy[_id] = _proxy_host
         self.peer2proxy.send_notification([_id], _proxy_host)

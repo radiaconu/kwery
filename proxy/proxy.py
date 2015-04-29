@@ -17,6 +17,8 @@ from config_proxy import ConfigProxy
 from proxy2disp import Proxy2Disp
 from proxy2peer import Proxy2Peer
 
+from proxy2object_kolntrace import Proxy2Object
+
 import sys
 sys.path.append('..')
 from templates.runnable import Runnable
@@ -31,6 +33,7 @@ class Proxy(Runnable):
         # effectively open connections
         self.proxy2disp = Proxy2Disp(self)
         self.proxy2peer = Proxy2Peer(self)
+        self.proxy2object = None 
         #self.proxy2proxy = Proxy2Proxy(self)
         
         # data management
@@ -38,10 +41,24 @@ class Proxy(Runnable):
         self.id2peer = dict()
         self.queries = dict() # id -> objects
     
+    def handle_put(self, _id, _value):
+        """ From object """        
+        _peer_host = self.id2peer.get(_id)
+        if _peer_host:
+            self.proxy2peer.send_put(_id, _value, _peer_host)
+        else:
+            self.proxy2disp.send_insert(_id, _value)
+         
+    def handle_query(self, _query_id, _min_value, _max_value):
+        """ From client TODO """
+        pass
+    
     def handle_query_answer_peers(self, _query_id, _objects):
+        """ From peer(s) """
         self.queries[_query_id] = _objects
     
     def handle_notification(self, _ids, _peer_host):
+        """ From peer """
         print "notif", _ids, _peer_host
         for _id in _ids:
             self.id2peer[_id] = _peer_host
@@ -57,5 +74,6 @@ class Proxy(Runnable):
 if __name__ == '__main__':
     proxy = Proxy()
     proxy.run()
-    proxy.generate_points()
+    proxy.proxy2object = Proxy2Object(proxy)
+    #proxy.generate_points()
     reactor.run()

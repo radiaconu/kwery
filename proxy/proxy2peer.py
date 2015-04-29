@@ -20,7 +20,7 @@ class Proxy2Peer_from(Node2Node_from):
     
     def received_notification(self, _ids, _peer_host):
         """ Structure: 'notification', _ids, (_peer_addr, _peer_port) """
-        print " here"
+        #print " here"
         self.proxy.handle_notification(_ids, _peer_host)
     
 class Proxy2Peer_to(Node2Node_to):
