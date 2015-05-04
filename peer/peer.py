@@ -47,6 +47,10 @@ class Peer(Runnable):
         result = self.index.get(_min_value, _max_value)
         self.peer2proxy.send_query_answer(_query_id, result, _proxy_host)
         
+    def cleanup(self):
+        import time
+        now = time.time()
+        
 if __name__ == '__main__':
     peer = Peer()
     peer.run()

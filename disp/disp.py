@@ -19,6 +19,9 @@ from disp2proxy import Disp2Proxy
 
 from twisted.internet import reactor
 
+from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketClientFactory, WebSocketServerProtocol, listenWS #
+from disp2visual import Monitor, Disp2Monitor
+
 import sys
 sys.path.append('..')
 from templates.runnable import Runnable
@@ -51,6 +54,20 @@ class Disp(Runnable):
         # effectively open connections
         self.disp2proxy = Disp2Proxy(self)
         self.disp2peer = Disp2Peer(self)
+        
+        ############
+        
+        #connect to monitor websocket
+        Monitor.disp = self
+        socketurl = 'ws://localhost:9997'
+        factory = WebSocketServerFactory(socketurl)
+        factory.protocol = Monitor
+        listenWS(factory)
+        print "Websocket",socketurl,"ok ..."
+        
+        #Disp2Monitor(self)
+        
+        ############
         
         # data management
         self.peers = dict() # host -> value
@@ -99,6 +116,14 @@ class Disp(Runnable):
     def handle_empty_query(self):
             pass
 
+
+    def cleanup(self):
+        import time
+        now = time.time()
+        for (_id,_peer) in self.peers.items():
+            if now - _peer[3] > self.config.interval:
+                del _peer
+                del self.peers[_id]
         
 if __name__ == '__main__':    
     
