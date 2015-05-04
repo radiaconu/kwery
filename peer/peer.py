@@ -21,6 +21,8 @@ from templates.runnable import Runnable
 from twisted.internet import reactor
 from twisted.internet.task import LoopingCall
 
+import time, os
+
 class Peer(Runnable):
     def __init__(self, _config_file = 'configPeerDefault.cfg'):
         # singleton
@@ -33,28 +35,71 @@ class Peer(Runnable):
         
         self.index = Index()
         self.id2proxy = dict() # obj id -> proxy_host
+        self.id2last_update = dict() # obj id -> time
+        self.id2last_insert = dict() # obj id -> time
         
         self.loop_send_update = LoopingCall(self.peer2disp.send_update)
         self.loop_send_update.start(self.config.UPDATE_INTERVAL)
+        # self.cpu_loop.start(10, now=False)
 
     def handle_put(self, _id, _value, _proxy_host):
-        print "put", _id
-        self.index.put(_id, _value)
-        self.id2proxy[_id] = _proxy_host
-        self.peer2proxy.send_notification([_id], _proxy_host)
+        now = time.time()
+        put = True
+        bc=self.index.get_bc()
+        w = self.index.get_width()
+        h = self.index.get_height()
+        
+        if self.index.load() < 100:
+            put=True
+        elif self.index.is_indexed(_id) and not self.index.is_covered(_value):
+            #if now - self.id2last_insert[_id] > 2:
+                put=False
+        elif abs(_value[0]-bc[0]) > w*.8 or abs(_value[1]-bc[1]) > h*.8:
+            put = False
+            
+        if put: 
+            self.index.put(_id, _value)
+            self.id2last_update = now
+            self.id2proxy[_id] = _proxy_host
+            self.peer2proxy.send_notification([_id], _proxy_host)
+            if not self.index.is_covered(_value):
+                self.id2last_insert[_id] = now
+        else:
+            print "transfer", _value
+            self.index.remove(_id)
+            self.peer2disp.send_transfer(_id, _value, _proxy_host)
     
     def handle_get(self, _query_id, _min_value, _max_value, _proxy_host):
         result = self.index.get(_min_value, _max_value)
         self.peer2proxy.send_query_answer(_query_id, result, _proxy_host)
         
     def cleanup(self):
-        import time
+        
         now = time.time()
+        # TODO: implement
+    
+#    def cpu_time(self):
+#        t = os.times()
+#        pt = self.lastProcTime
+#        passed = t[4]-pt[4]
+#        
+#        self.ticks = self.count_ticks/passed
+#        #print "ticks", self.ticks, len(self.objects), len(self.localZone.objects)
+#        self.count_ticks = 0
+#        self.localZone.cpu = round( (t[0]+t[1]-pt[0]-pt[1])*100/passed , 2 )
+#        self.lastProcTime = t
         
 if __name__ == '__main__':
-    peer = Peer()
+    from argparse import ArgumentParser, FileType
+    
+    argParser = ArgumentParser(description='Generate dynamic graph edges file in JSON format.')
+    argParser.add_argument('--c', type=FileType('rw'), default="configPeerDefault.cfg", help='the configuration file, default configPeerDefault.cfg')
+    
+    args = argParser.parse_args()
+    
+    print args.c.name
+    peer = Peer(args.c.name)
     peer.run()
     
-    _msg = ['print', 'yo']
        
     reactor.run()

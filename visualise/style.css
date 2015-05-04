@@ -95,7 +95,11 @@ table tr:hover td {
 	background: -webkit-gradient(linear, left top, left bottom, from(#f2f2f2), to(#f0f0f0));
 	background: -moz-linear-gradient(top,  #f2f2f2,  #f0f0f0);	
 }
-
+circle {
+    r: 10px;
+    color: black;
+    opacity: 0.5;
+}
 rect {
     fill: steelblue;
     stroke: grey;
@@ -119,9 +123,9 @@ rect {
 }
 
 #viz {
-    //border-radius: 25px;
     border: 2px solid gray;
     padding: 20px; 
-    width: 800px;
-    height: 800px;    
+    width: 1000px;
+    height: 1000px;    
 }
+

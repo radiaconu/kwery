@@ -87,15 +87,45 @@ class Disp(Runnable):
         
      
     def handle_insert_object(self, _id, _value, _proxy_host):
-        print "handle_insert_object", _id
         if not self.peers:
-           return         
-        peer = min(self.peers.keys(), key=lambda p: abs(_value[0]-self.peers[p][1][0])+abs(_value[1]-self.peers[p][1][1]) )
+           return     
+        
+        
+        def increases_area(_value, _peer):
+            _min_value, _max_value = list(_peer[0][0]), list(_peer[0][1])
+            
+            a1 = (_max_value[0]-_min_value[0]) * (_max_value[1]-_min_value[1])
+            
+            if  _value[0] < _min_value[0]: _min_value[0] = _value[0]
+            if  _value[1] < _min_value[1]: _min_value[1] = _value[1]
+            if  _value[0] > _max_value[0]: _max_value[0] = _value[0]
+            if  _value[1] > _max_value[1]: _max_value[1] = _value[1]
+            
+            a2 = (_max_value[0]-_min_value[0]) * (_max_value[1]-_min_value[1])
+            
+            return a2-a1
+        
+        peer = next((p for p in self.peers.keys() if self.peers[p][2]<100), None)
+        if not peer:
+            all_increases = {p:increases_area(_value, self.peers[p]) for p in self.peers.keys()}
+            all_increases0 = {p:all_increases[p] for p in all_increases.keys()}
+            
+            if all_increases0:
+                print '0'
+                peer = min(all_increases0.keys(), key=lambda p:abs(_value[0]-self.peers[p][1][0])**2+abs(_value[1]-self.peers[p][1][1])**2 )
+            else:
+                print 'min'
+                peer = min(all_increases.keys(), key=lambda p: all_increases[p])
+           
+        #peer = next((p for p in self.peers.keys() if self.peers[p][2]==0), None)
+        #if peer is None:         
+        #    peer = min(self.peers.keys(), key=lambda p: increases_area(_value, self.peers[p]))
+            # abs(_value[0]-self.peers[p][1][0])**2+abs(_value[1]-self.peers[p][1][1])**2 )
+        
         self.disp2peer.send_insert(_id, _value, _proxy_host, peer)
         
-    def handle_update_peer(self, _coverage, _barycenter, _peer_host):
-        print _peer_host, _barycenter
-        self.peers[tuple(_peer_host)] = (_coverage, _barycenter)
+    def handle_update_peer(self, _coverage, _barycenter, _object_load, _peer_host):
+        self.peers[tuple(_peer_host)] = (_coverage, _barycenter, _object_load)
         
     def handle_query_received(self, _query_id, _min_value, _max_value, _proxy_host):
         inters_peers = []

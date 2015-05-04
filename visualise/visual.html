@@ -10,26 +10,28 @@
 
     var globalSVG = d3.select("#viz")
         .append("svg")
-        .attr("width", 800)
-        .attr("height", 800);    
+        .attr("width", 1000)
+        .attr("height", 1000);    
 
         //.on("mouseover", function(){d3.select(this).style("fill", "aliceblue");})
         //.on("mouseout", function(){d3.select(this).style("fill", "white");});
 
-    function Rectangle(_id, _x, _y, _width, _height, _data){
+    function Rectangle(_id, _x, _y, _width, _height, _data, _bc_x, _bc_y){
 
         this.id = _id;
 
-        this.set = function(_x, _y, _width, _height, _data){
+        this.set = function(_x, _y, _width, _height, _data, _bc_x, _bc_y){
             this.x = _x;
             this.y = _y;
             this.width = _width;
             this.height = _height;
             this.data = _data;
             this.lastUpdated = new Date().getTime();
+            this.bc_x = _bc_x;
+            this.bc_y = _bc_y;
         }
 
-        this.set(_x, _y, _width, _height, _data);
+        this.set(_x, _y, _width, _height, _data, _bc_x, _bc_y);
 
         this.rect = globalSVG.append("rect")
             .attr("x",this.x)
@@ -44,10 +46,15 @@
             .attr("y", this.y)
             .text(this.id)
             .attr("dy", ".3em"); // all
+        
+        this.center = globalSVG.append("circle")
+            .attr("cx", this.bc_x)
+            .attr("cy", this.bc_y)
+            .attr("r", 10);
 
-        this.update = function(_x, _y, _width, _height, _data){
+        this.update = function(_x, _y, _width, _height, _data, _bc_x, _bc_y){
             
-            this.set(_x, _y, _width, _height, _data);
+            this.set(_x, _y, _width, _height, _data, _bc_x, _bc_y);
             this.rect.transition()
                 .attr("x",this.x)
                 .attr("y",this.y)
@@ -60,6 +67,10 @@
                 .attr("y", this.y)
                 .text(this.id)
                 .duration(1000); 
+            this.center.transition()
+                .attr("cx", this.bc_x)
+                .attr("cy", this.bc_y)
+                .duration(1000); 
         }
         
         this.remove = function(){
@@ -70,7 +81,6 @@
     var rects = new Array();
     function clean_rects(){
         var now = new Date().getTime();
-        console.log("-- cleanup --"+now);
         for (var r in rects){
             if (now - rects[r].lastUpdated > 5000){
                 console.log("-- remove--"+rects[r].id);
@@ -99,34 +109,32 @@
                 var r = new Array(), j = -1;
                 for (var zone in report){//if (report.hasOwnProperty(zone)){
                     id = report[zone]['id']
-                    x = report[zone]['x'];
-                    y = report[zone]['y'];
-                    width = report[zone]['width'];
-                    height = report[zone]['height'];
-
+                    x = Number((report[zone]['x']).toFixed(1));
+                    y = Number((report[zone]['y']).toFixed(1));
+                    width = Number((report[zone]['width']).toFixed(1));
+                    height = Number((report[zone]['height']).toFixed(1));
+                    bc_x = Number((report[zone]['bc_x']).toFixed(1)) ;
+                    bc_y = Number((report[zone]['bc_y']).toFixed(1)) ;
+                    
                     r[++j] ='<tr><td>';
                     r[++j] = id;
                     r[++j] = '</td><td>';
-                    r[++j] = x;
+                    r[++j] = x+', '+y;
                     r[++j] = '</td><td>';
-                    r[++j] = y;
+                    r[++j] = width+', '+ height;
                     r[++j] = '</td><td>';
-                    r[++j] = width;
+                    r[++j] = bc_x+', '+bc_y;
                     r[++j] = '</td><td>';
-                    r[++j] = height;
-                    r[++j] = '</td><td>';
-                    r[++j] = report[zone]['bc_x'];
-                    r[++j] = '</td><td>';
-                    r[++j] = report[zone]['bc_y'];
+                    r[++j] = report[zone]['object_load'];
                     r[++j] = '</td></tr>';
                     if(!rects.hasOwnProperty(id)){
-                        rects[id]= new Rectangle(id, x, y, width, height, 's'); 
+                        rects[id]= new Rectangle(id, x, y, width, height, 's', bc_x, bc_y); 
                     }
                     else{
-                        rects[id].update(x, y, width, height, 'ss');
+                        rects[id].update(x, y, width, height, 'ss', bc_x, bc_y);
                     }
                 }//}
-                var s = "<table cellspacing='0'> <tr><th>Id</th><th>x</th><th>y</th><th>width</th><th>height</th><th>bc x</th><th>bc y</th></tr></thead><tbody>"+r.join('')+"</tbody></table>";
+                var s = "<table cellspacing='0'> <tr><th>Id</th><th>x, y</th><th>w, h</th><th>bc</th><th>load</th></tr></thead><tbody>"+r.join('')+"</tbody></table>";
                 document.getElementById('datatable').innerHTML = (s);             };
             ws.onclose = function(){
                 console.log("not ok");

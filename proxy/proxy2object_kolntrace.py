@@ -62,6 +62,27 @@ class Parser:
         
         self.file.seek(0)
         return ids
+    
+    def search(self):
+        self.file.seek(0)
+        print "search"
+        min_x = 100000
+        min_y = 100000
+        max_x = -100000
+        max_y = -100000
+        cur_line = self.file.readline()
+        while cur_line:
+            cur_values = cur_line.split()
+            cur_x = float(cur_values[2])
+            cur_y = float(cur_values[3])
+            if cur_x<min_x:  min_x=cur_x
+            if cur_y<min_y:  min_y=cur_y
+            if cur_x>max_x:  max_x=cur_x
+            if cur_y>max_y:  max_y=cur_y
+            cur_line = self.file.readline()
+            
+        print (min_x, min_y),(max_x, max_y)
+        self.file.seek(0)
         
 class Proxy2Object:
     def __init__(self, _proxy):
@@ -69,6 +90,7 @@ class Proxy2Object:
         
         parser = Parser()
         parser.proxy = _proxy
-        ids = parser.pick_ids(1000)
+        #parser.search()
+        ids = parser.pick_ids(10000)
         parser.simulate(ids)
         

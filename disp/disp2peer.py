@@ -14,12 +14,13 @@ from templates.node2node import Node2Node, Node2Node_from, Node2Node_to
 
 class Disp2Peer_from(Node2Node_from):
 
-    def received_update(self, _coverage, _barycenter, _peer_host):
+    def received_update(self, _coverage, _barycenter, _object_load, _peer_host):
         """ Structure: 'update', (_peer_addr, _peer_port), _value """
-        self.disp.handle_update_peer(_coverage, _barycenter, _peer_host)     
+        self.disp.handle_update_peer(_coverage, _barycenter, _object_load, _peer_host)     
     
     def received_transfer(self, _id, _value, _proxy_host):
         """ Structure: 'insert', _id, _value, (_proxy_addr, _proxy_port) """
+        print "transfer", _value
         self.disp.handle_insert_object(_id, _value, _proxy_host)
     
 
