@@ -90,32 +90,29 @@ class Disp(Runnable):
         if not self.peers:
            return     
         
-        
         def increases_area(_value, _peer):
-            _min_value, _max_value = list(_peer[0][0]), list(_peer[0][1])
-            
-            a1 = (_max_value[0]-_min_value[0]) * (_max_value[1]-_min_value[1])
-            
+            _min_value, _max_value = list(_peer[0][0]), list(_peer[0][1])            
+            a1 = (_max_value[0]-_min_value[0]) * (_max_value[1]-_min_value[1])            
             if  _value[0] < _min_value[0]: _min_value[0] = _value[0]
             if  _value[1] < _min_value[1]: _min_value[1] = _value[1]
             if  _value[0] > _max_value[0]: _max_value[0] = _value[0]
-            if  _value[1] > _max_value[1]: _max_value[1] = _value[1]
-            
+            if  _value[1] > _max_value[1]: _max_value[1] = _value[1]            
             a2 = (_max_value[0]-_min_value[0]) * (_max_value[1]-_min_value[1])
             
             return a2-a1
         
-        peer = next((p for p in self.peers.keys() if self.peers[p][2]<100), None)
+        all_increases = {p:increases_area(_value, self.peers[p]) for p in self.peers.keys()}
+        all_increases0 = {p:all_increases[p] for p in all_increases.keys() if all_increases[p]==0}
+        if all_increases0:
+            print '+0'
+            peer = min(all_increases0.keys(), key=lambda p:(abs(_value[0]-self.peers[p][1][0])+ abs(_value[1]-self.peers[p][1][1]) ))
+            #peer = min(all_increases0.keys(), key=lambda p:self.peers[p][2])
+        else:
+            print 'o'
+            peer = next((p for p in self.peers.keys() if self.peers[p][2]<10), None)
         if not peer:
-            all_increases = {p:increases_area(_value, self.peers[p]) for p in self.peers.keys()}
-            all_increases0 = {p:all_increases[p] for p in all_increases.keys()}
-            
-            if all_increases0:
-                print '0'
-                peer = min(all_increases0.keys(), key=lambda p:abs(_value[0]-self.peers[p][1][0])**2+abs(_value[1]-self.peers[p][1][1])**2 )
-            else:
-                print 'min'
-                peer = min(all_increases.keys(), key=lambda p: all_increases[p])
+            print 'min'
+            peer = min(all_increases.keys(), key=lambda p: all_increases[p])
            
         #peer = next((p for p in self.peers.keys() if self.peers[p][2]==0), None)
         #if peer is None:         

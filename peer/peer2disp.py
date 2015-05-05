@@ -13,7 +13,7 @@ from templates.node2node import Node2Node, Node2Node_to, Node2Node_from
 class Peer2Disp_from(Node2Node_from):
     def received_insert(self, _id, _value, _proxy_host):
         """ Structure: 'insert', _id, _value, (_proxy_addr, _proxy_port) """
-        self.peer.handle_put(_id, _value, _proxy_host)
+        self.peer.handle_put(_id, _value, _proxy_host, _force=True)
         
     def received_get(self, _query_id, _min_value, _max_value, _proxy_host):
         """ Structure: 'get', _query_id, _min_value, _max_value, (_proxy_addr, _proxy_port) """

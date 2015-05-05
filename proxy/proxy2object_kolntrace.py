@@ -45,7 +45,7 @@ class Parser:
             cur_time = int(cur_values[0])
         
         if cur_time < self.end_time:
-            reactor.callLater(0.02, self.simulate, ids)
+            reactor.callLater(0.2, self.simulate, ids)
         
             
             

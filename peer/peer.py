@@ -40,33 +40,39 @@ class Peer(Runnable):
         
         self.loop_send_update = LoopingCall(self.peer2disp.send_update)
         self.loop_send_update.start(self.config.UPDATE_INTERVAL)
+        
+        self.loop_cleanup = LoopingCall(self.cleanup)
+        self.loop_cleanup.start(self.config.UPDATE_INTERVAL)
         # self.cpu_loop.start(10, now=False)
 
-    def handle_put(self, _id, _value, _proxy_host):
+    def handle_put(self, _id, _value, _proxy_host, _force = False):
         now = time.time()
         put = True
-        bc=self.index.get_bc()
-        w = self.index.get_width()
-        h = self.index.get_height()
         
-        if self.index.load() < 100:
-            put=True
-        elif self.index.is_indexed(_id) and not self.index.is_covered(_value):
-            #if now - self.id2last_insert[_id] > 2:
-                put=False
-        elif abs(_value[0]-bc[0]) > w*.8 or abs(_value[1]-bc[1]) > h*.8:
-            put = False
+        if not _force:
+            self.index.coverage()
+            bc=self.index.get_bc()
+            w = self.index.get_width()
+            h = self.index.get_height()
+            
+            if self.index.is_indexed(_id) and not self.index.is_covered(_value):
+                if now - self.id2last_insert[_id] > 2:
+                    put=False
+            elif abs(_value[0]-bc[0]) > w*.8 or abs(_value[1]-bc[1]) > h*.8:
+                put = False
             
         if put: 
             self.index.put(_id, _value)
-            self.id2last_update = now
             self.id2proxy[_id] = _proxy_host
-            self.peer2proxy.send_notification([_id], _proxy_host)
-            if not self.index.is_covered(_value):
+            if not self.id2last_insert.get(_id):
                 self.id2last_insert[_id] = now
+            self.id2last_update[_id] = now
+            self.peer2proxy.send_notification([_id], _proxy_host)
         else:
-            print "transfer", _value
             self.index.remove(_id)
+            self.id2last_insert.pop(_id, None)
+            self.id2last_update.pop(_id, None)
+            self.id2proxy.pop(_id, None)
             self.peer2disp.send_transfer(_id, _value, _proxy_host)
     
     def handle_get(self, _query_id, _min_value, _max_value, _proxy_host):
@@ -74,9 +80,14 @@ class Peer(Runnable):
         self.peer2proxy.send_query_answer(_query_id, result, _proxy_host)
         
     def cleanup(self):
-        
         now = time.time()
-        # TODO: implement
+        for _id, _last_update in self.id2last_update.items():
+            if now-_last_update > 2:
+                print "cleanup", _id
+                self.index.remove(_id)
+                self.id2last_insert.pop(_id)
+                self.id2last_update.pop(_id)
+                self.id2proxy.pop(_id)
     
 #    def cpu_time(self):
 #        t = os.times()

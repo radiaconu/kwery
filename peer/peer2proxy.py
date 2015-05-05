@@ -17,7 +17,6 @@ class Peer2Proxy_to(Node2Node_to):
     def send_notification(self, _ids, _proxy_host):
         """ Structure: 'notification', _ids, (self.peer.config.listenProxyAddr, self.peer.config.listenProxyPort) """
         msg = ('notification', _ids, self.host)
-        print msg, _proxy_host
         self._send(msg, _proxy_host)
 
 class Peer2Proxy_from(Node2Node_from):
