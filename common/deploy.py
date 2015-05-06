@@ -5,29 +5,33 @@ Created on Tue May  5 11:38:29 2015
 @author: Raluca Diaconu (diaconu.raluca@gmail.com)
 """
 
-import argparse, ConfigParser, string
+import argparse, string
 import os, stat
+from ConfigParser import ConfigParser
 
 import sys
 sys.path.append('..')
 from templates.runnable import Runnable
 
 
-addresses = dict(
-    localhost = "127.0.0.1"
-)
+#unique ports
+disp_listenPeerPort     = 8000
+disp_listenProxyPort    = 8001
 
 # starting ports
-z2z = 7200
-z2p = 7300
-z2d = 7400
-z2m = 7500
+peer_listenProxyPort    = 7200
+peer_listenDispPort     = 7300
+peer_listenPeerPort     = 7400
+proxy_listenProxyPort   = 7500
+proxy_listenPeerPort    = 7600
+proxy_listenDispPort    = 7700
+
 
 configs_directory = './configs'
 
-start_peers = 'peer/start_peer.sh'
-start_proxies = 'proxy/start_proxies.sh'
-start_disp = 'disp/start_disp.sh'
+start_peers = '../peer/start_peer.sh'
+start_proxies = '../proxy/start_proxies.sh'
+start_disp = '../disp/start_disp.sh'
 
 peer_config_files = []
 proxy_config_files = []
@@ -39,13 +43,25 @@ config_fn_proxies = 'peer/config_proxy'
 timer = 2
 
 class Node:    
-    template = None
+    template_file = None
     def write_config(self):
-        self.cfg.write(open(self.cfg_filename, 'w'))
+        self.cfg.write(open(self.path+self.cfg_filename, 'w'))
         
     def make_start_file(self):
+        # read template
+        try: # reading templates
+            template_start_str = open(self.__class__.template_file, 'r').read()
+            start_file = open(self.__class__.start_file, 'w')
+            autorestart_zone_file.write('#!/bin/sh\n')
+        except Exception:
+            print "Error reading templates"
+            return
+            
+        if not os.path.exists(configs_directory):
+            os.makedirs(configs_directory)
+        
         # generate autorestart
-        start_all_str = string.Template(self.template_file).safe_substitute(dict(
+        start_all_str = string.Template(template_start_str).safe_substitute(dict(
             name = self.cfg_filename))
         self.start_all_file.write(start_all_str)
         
@@ -53,6 +69,11 @@ class Node:
         print "added", self.start_all_file
     
 class Peer(Node):
+    path = '../peer/'
+    config_file = 'config_peer'
+    start_file = 'start_peers.sh'
+    template_file = 'template_start_peers.sh'
+    
     def __init__(self, addr, listenDispPort, listenProxyPort, listenPeerPort):
         self.addr = addr
         self.listenDispPort = listenDispPort
@@ -94,6 +115,8 @@ nb_peers = 0
 nb_proxies = 0
 
 def load_global_config(_config_file):
+    """ Open the global config file and load all parameters
+    """
     config = ConfigParser()
     config.read(_config_file)
     
@@ -105,7 +128,7 @@ def load_global_config(_config_file):
         print 'No Peer section in %s file'%_config_file 
         
     if 'Proxy' in  config.sections():
-        proxy_addr = config.get('Proxy','disp_addr')
+        proxy_addr = config.get('Proxy','proxy_addr')
         nb_proxies = config.getint('Proxy','nb_proxies')
     else:
         print 'No Proxy section in %s file'%_config_file
@@ -115,14 +138,20 @@ def load_global_config(_config_file):
     else:
         print 'No Disp section in %s file'%_config_file
     
+    if 'Other' in  config.sections():
+        interpreter = config.get('Other','interpreter')
+        interval = config.get('Other','interval')
+    
 
 if __name__ == '__main__':
     argParser = argparse.ArgumentParser(description="Deploy multiple nodes and proxies")
-    argParser.add_argument('-c','--config', default="config.cfg",  help="Global config file; default config.cfg")
+    argParser.add_argument('-c','--config', default="deploy_config.cfg",  help="Global config file; default deploy_config.cfg")
 
-    args = argParser.parse_args().config
+    args = argParser.parse_args()
 
-    load_global_config()
+    load_global_config(args.config)
+    
+    
     peers = []
     for i in range(nb_peers):
         peers.append(Peer(peer_addr, 
@@ -132,17 +161,6 @@ if __name__ == '__main__':
     proxies = []
     
     disp = None
-    
-    try: # reading templates
-        template_autorestart_zone = open('template_autorestart_zone.sh', 'r').read()
-        autorestart_zone_file = open(autorestart_zone, 'w')
-        autorestart_zone_file.write('#!/bin/sh\n')
-    except Exception:
-        print "Error reading templates"
-        exit
-        
-    if not os.path.exists(configs_directory):
-        os.makedirs(configs_directory)
     
 
         
