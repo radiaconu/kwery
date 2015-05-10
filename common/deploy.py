@@ -5,13 +5,14 @@ Created on Tue May  5 11:38:29 2015
 @author: Raluca Diaconu (diaconu.raluca@gmail.com)
 """
 
+# TODO: kill all, kill some, template?
+
 import argparse, string
 import os, stat
 from ConfigParser import ConfigParser
 
 import sys
 sys.path.append('..')
-from templates.runnable import Runnable
 
 
 #unique ports
@@ -27,70 +28,71 @@ proxy_listenPeerPort    = 7600
 proxy_listenDispPort    = 7700
 
 
-configs_directory = './configs'
-
-start_peers = '../peer/start_peer.sh'
-start_proxies = '../proxy/start_proxies.sh'
-start_disp = '../disp/start_disp.sh'
-
-peer_config_files = []
-proxy_config_files = []
-disp_config_files = 'peer/config_disp'
-
-config_fn_peers = 'peer/config_peer'
-config_fn_proxies = 'peer/config_proxy'
-
 timer = 2
 
-class Node:    
-    template_file = None
-    def write_config(self):
-        self.cfg.write(open(self.path+self.cfg_filename, 'w'))
+class Node(object): 
+    def write_config(self, _cfg):
+        Node = self.__class__
         
-    def make_start_file(self):
+        if not os.path.exists(Node.path + Node.configs_path):
+            os.makedirs(Node.path + Node.configs_path)
+            
+        _cfg.write(open(Node.path + Peer.configs_path + self.config_file, 'w'))
+    
+    @classmethod
+    def make_start_file(Node):
         # read template
         try: # reading templates
-            template_start_str = open(self.__class__.template_file, 'r').read()
-            start_file = open(self.__class__.start_file, 'w')
-            autorestart_zone_file.write('#!/bin/sh\n')
+            template_start_str = open(Node.template_file, 'r').read()
+            start_ = open(Node.path + Node.start_file, 'w') # add path
+            start_.write('#!/bin/sh\n')
         except Exception:
             print "Error reading templates"
             return
-            
-        if not os.path.exists(configs_directory):
-            os.makedirs(configs_directory)
         
         # generate autorestart
-        start_all_str = string.Template(template_start_str).safe_substitute(dict(
-            name = self.cfg_filename))
-        self.start_all_file.write(start_all_str)
+        for p in Node._all:
+            start_all_str = string.Template(template_start_str).safe_substitute(dict(
+                name = p.config_file,
+                interpreter = Node.interpreter))
+            start_.write(start_all_str)
         
-        os.chmod(self.start_all_file, stat.S_IRWXU| stat.S_IEXEC)
-        print "added", self.start_all_file
+        os.chmod(Node.path + Node.start_file, stat.S_IRWXU| stat.S_IEXEC)
+        print "added", start_
     
 class Peer(Node):
+    _addr = 'localhost'     # default
+    _nb = 0                 # default
+    
+    interpreter = 'pypy'
+
     path = '../peer/'
+    configs_path = 'configs/'
     config_file = 'config_peer'
     start_file = 'start_peers.sh'
-    template_file = 'template_start_peers.sh'
+    template_file = 'template_start_peer'
     
-    def __init__(self, addr, listenDispPort, listenProxyPort, listenPeerPort):
+    _all = list()
+    
+    def __init__(self, addr, i):
         self.addr = addr
-        self.listenDispPort = listenDispPort
-        self.listenProxyPort = listenProxyPort
-        self.listenPeerPort = listenPeerPort
+        self.listenDispPort = peer_listenDispPort+i
+        self.listenProxyPort = peer_listenProxyPort+i
+        self.listenPeerPort = peer_listenPeerPort+i
         self.timer = timer
-        self.cfg_filename = ' '
+        self.config_file = Peer.config_file + str(i) + '.cfg'
+        
+        Peer._all.append(self)
         
     def make_config(self):
-        _cfg = ConfigParser.ConfigParser()
+        _cfg = ConfigParser()
         _cfg.optionxform=str
         
         _cfg.add_section('Network')
         _cfg.set('Network', 'listenDispAddr',   str(self.addr) ) # local ip address of the peer
         _cfg.set('Network', 'listenDispPort',   str(self.listenDispPort) )
-        _cfg.set('Network', 'connectDispAddr',  str(self.addr) )
-        _cfg.set('Network', 'conectDispPort',   str(self.conectDispPort) )
+        _cfg.set('Network', 'connectDispAddr',  str(Disp._addr) )
+        _cfg.set('Network', 'conectDispPort',   str(Disp.listenPeerPort) )
         
         _cfg.set('Network', 'listenPeerAddr',   str(self.addr) )
         _cfg.set('Network', 'listenPeerPort',   str(self.listenPeerPort) )
@@ -101,19 +103,62 @@ class Peer(Node):
         _cfg.add_section('Timer')
         _cfg.set('Timer',   'interval', str(self.timer))
         
-        self.cfg = _cfg
+        self.write_config(_cfg)
+        
+    
+class Disp(Node): 
+    listenPeerPort = disp_listenPeerPort
+    listenProxyPort = disp_listenProxyPort
+    
+class Proxy(Node): 
+    _addr = 'localhost'
+    _nb = 0
+    
+    interpreter = 'pypy'
+
+    path = '../proxy/'
+    configs_path = 'configs/'
+    config_file = 'config_proxy'
+    start_file = 'start_proxies.sh'
+    template_file = 'template_start_proxy'
+    
+    _all = list()
+    
+    def __init__(self, addr, i):
+        self.addr = addr
+        self.listenDispPort = proxy_listenDispPort+i
+        self.listenProxyPort = proxy_listenProxyPort+i
+        self.listenPeerPort = proxy_listenPeerPort+i
+        self.timer = timer
+        self.config_file = Proxy.config_file + str(i) + '.cfg'
+        
+        Proxy._all.append(self)
+        
+    def make_config(self):
+        _cfg = ConfigParser()
+        _cfg.optionxform=str
+        
+        _cfg.add_section('Network')
+        _cfg.set('Network', 'listenDispAddr',   str(self.addr) ) # local ip address of the peer
+        _cfg.set('Network', 'listenDispPort',   str(self.listenDispPort) )
+        _cfg.set('Network', 'connectDispAddr',  str(Disp._addr) )
+        _cfg.set('Network', 'conectDispPort',   str(Disp.listenProxyPort) )
+        
+        _cfg.set('Network', 'listenPeerAddr',   str(self.addr) )
+        _cfg.set('Network', 'listenPeerPort',   str(self.listenPeerPort) )
+        
+        _cfg.set('Network', 'listenProxyAddr',  str(self.addr) )
+        _cfg.set('Network', 'listenProxyPort',  str(self.listenProxyPort) )
+        
+        _cfg.add_section('Timer')
+        _cfg.set('Timer',   'interval', str(self.timer))
+        
+        self.write_config(_cfg)
     
 
-class Proxy(Node): pass
-class Disp(Node): pass
-        
-
-peer_addr = 'localhost'
-disp_addr = 'localhost'
-proxy_addr = 'localhost'
-nb_peers = 0
-nb_proxies = 0
-
+# TODO
+class GlobalConfig(object): pass
+    
 def load_global_config(_config_file):
     """ Open the global config file and load all parameters
     """
@@ -122,24 +167,24 @@ def load_global_config(_config_file):
     
     # reading arguments
     if 'Peer' in  config.sections():
-        peer_addr = config.get('Peer','peer_addr')
-        nb_peers = config.getint('Peer','nb_peers') 
+        Peer._addr = config.get('Peer','peer_addr')
+        Peer._nb = config.getint('Peer','nb_peers') 
     else:
         print 'No Peer section in %s file'%_config_file 
         
     if 'Proxy' in  config.sections():
-        proxy_addr = config.get('Proxy','proxy_addr')
-        nb_proxies = config.getint('Proxy','nb_proxies')
+        Proxy._addr = config.get('Proxy','proxy_addr')
+        Proxy._nb = config.getint('Proxy','nb_proxies')
     else:
         print 'No Proxy section in %s file'%_config_file
     
     if 'Disp' in  config.sections():
-        disp_addr = config.get('Disp','disp_addr')
+        Disp._addr = config.get('Disp','disp_addr')
     else:
         print 'No Disp section in %s file'%_config_file
     
     if 'Other' in  config.sections():
-        interpreter = config.get('Other','interpreter')
+        Peer.interpreter = Proxy.interpreter = Disp.interpreter = config.get('Other','interpreter')
         interval = config.get('Other','interval')
     
 
@@ -151,14 +196,19 @@ if __name__ == '__main__':
 
     load_global_config(args.config)
     
+    # disp
     
-    peers = []
-    for i in range(nb_peers):
-        peers.append(Peer(peer_addr, 
-                          peer_listenDispPort+i, 
-                          peer_listenProxyPort+i, 
-                          peer_listenPeerPort+i))
-    proxies = []
+    # peers
+    [Peer(Peer._addr, i) for i in range(Peer._nb)]    
+    [p.make_config() for p in Peer._all]       
+        
+    Peer.make_start_file()
+    
+    # proxies
+    [Proxy(Proxy._addr, i) for i in range(Proxy._nb)]    
+    [p.make_config() for p in Proxy._all]       
+        
+    Proxy.make_start_file()
     
     disp = None
     
