@@ -42,6 +42,7 @@ class Node(object):
             os.makedirs(Node.path + Node.configs_path)
             
         _cfg.write(open(Node.path + Peer.configs_path + self.config_file, 'w'))
+        print "added config file", Node.path + Peer.configs_path + self.config_file
     
     @classmethod
     def make_start_file(Node):
@@ -57,12 +58,13 @@ class Node(object):
         # generate autorestart
         for p in Node._all:
             start_all_str = string.Template(template_start_str).safe_substitute(dict(
-                name = p.config_file,
+                name = Node.configs_path + p.config_file,
                 interpreter = Node.interpreter))
             start_.write(start_all_str)
         
         os.chmod(Node.path + Node.start_file, stat.S_IRWXU| stat.S_IEXEC)
-        print "added", start_
+        print "added start file", start_
+        print
     
 class Peer(Node):
     path = '../peer/'
@@ -91,7 +93,7 @@ class Peer(Node):
         _cfg.set('Network', 'listenDispAddr',   str(self.addr) ) # local ip address of the peer
         _cfg.set('Network', 'listenDispPort',   str(self.listenDispPort) )
         _cfg.set('Network', 'connectDispAddr',  str(Disp._addr) )
-        _cfg.set('Network', 'conectDispPort',   str(Disp.listenPeerPort) )
+        _cfg.set('Network', 'connectDispPort',   str(Disp.listenPeerPort) )
         
         _cfg.set('Network', 'listenPeerAddr',   str(self.addr) )
         _cfg.set('Network', 'listenPeerPort',   str(self.listenPeerPort) )
@@ -170,7 +172,7 @@ class Proxy(Node):
         _cfg.set('Network', 'listenDispAddr',   str(self.addr) ) # local ip address of the peer
         _cfg.set('Network', 'listenDispPort',   str(self.listenDispPort) )
         _cfg.set('Network', 'connectDispAddr',  str(Disp._addr) )
-        _cfg.set('Network', 'conectDispPort',   str(Disp.listenProxyPort) )
+        _cfg.set('Network', 'connectDispPort',   str(Disp.listenProxyPort) )
         
         _cfg.set('Network', 'listenPeerAddr',   str(self.addr) )
         _cfg.set('Network', 'listenPeerPort',   str(self.listenPeerPort) )

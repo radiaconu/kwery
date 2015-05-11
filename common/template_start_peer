@@ -1,7 +1,7 @@
 if pgrep -f $name ; then echo 'node ', $name, 'is running'
 else
     cd $(dirname $0)
-    nohup $interpreter peer.py -c $name &
+    nohup $interpreter peer.py --c $name &
 fi
 # new line !!
 

@@ -103,7 +103,7 @@ class Peer(Runnable):
 if __name__ == '__main__':
     from argparse import ArgumentParser, FileType
     
-    argParser = ArgumentParser(description='Generate dynamic graph edges file in JSON format.')
+    argParser = ArgumentParser(description='The Peer.')
     argParser.add_argument('--c', type=FileType('rw'), default="configPeerDefault.cfg", help='the configuration file, default configPeerDefault.cfg')
     
     args = argParser.parse_args()

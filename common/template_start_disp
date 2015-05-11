@@ -1,0 +1,7 @@
+if pgrep -f $name ; then echo 'disp ', $name, 'is running'
+else
+    cd $(dirname $0)
+    nohup $interpreter disp.py --c $name &
+fi
+# new line !!
+

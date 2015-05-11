@@ -122,6 +122,7 @@ class Disp(Runnable):
         self.disp2peer.send_insert(_id, _value, _proxy_host, peer)
         
     def handle_update_peer(self, _coverage, _barycenter, _object_load, _peer_host):
+        print 'update peer'
         self.peers[tuple(_peer_host)] = (_coverage, _barycenter, _object_load)
         
     def handle_query_received(self, _query_id, _min_value, _max_value, _proxy_host):
@@ -153,8 +154,16 @@ class Disp(Runnable):
                 del self.peers[_id]
         
 if __name__ == '__main__':    
+    from argparse import ArgumentParser, FileType
     
-    disp = Disp()    
+    argParser = ArgumentParser(description='Dispatcher.')
+    argParser.add_argument('--c', type=FileType('rw'), default="configDispDefault.cfg", help='the configuration file, default configDispDefault.cfg')
+    
+    args = argParser.parse_args()
+    
+    print args.c.name
+    
+    disp = Disp(args.c.name)    
     disp.run()
 
     reactor.run()

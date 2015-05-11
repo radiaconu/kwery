@@ -72,7 +72,15 @@ class Proxy(Runnable):
         print "done"
         
 if __name__ == '__main__':
-    proxy = Proxy()
+    from argparse import ArgumentParser, FileType
+    
+    argParser = ArgumentParser(description='The Proxy.')
+    argParser.add_argument('--c', type=FileType('rw'), default="configProxyDefault.cfg", help='the configuration file, default configProxyDefault.cfg')
+    
+    args = argParser.parse_args()
+    
+    print args.c.name
+    proxy = Proxy(args.c.name)
     proxy.run()
     proxy.proxy2object = Proxy2Object(proxy)
     #proxy.generate_points()
