@@ -28,9 +28,13 @@ proxy_listenPeerPort    = 7600
 proxy_listenDispPort    = 7700
 
 
-timer = 2
+interval = 2
 
 class Node(object): 
+    _addr = 'localhost'     # default
+    _nb = 0                 # default
+    
+    interpreter = 'pypy'
     def write_config(self, _cfg):
         Node = self.__class__
         
@@ -61,11 +65,6 @@ class Node(object):
         print "added", start_
     
 class Peer(Node):
-    _addr = 'localhost'     # default
-    _nb = 0                 # default
-    
-    interpreter = 'pypy'
-
     path = '../peer/'
     configs_path = 'configs/'
     config_file = 'config_peer'
@@ -79,7 +78,7 @@ class Peer(Node):
         self.listenDispPort = peer_listenDispPort+i
         self.listenProxyPort = peer_listenProxyPort+i
         self.listenPeerPort = peer_listenPeerPort+i
-        self.timer = timer
+        self.interval = interval
         self.config_file = Peer.config_file + str(i) + '.cfg'
         
         Peer._all.append(self)
@@ -101,7 +100,7 @@ class Peer(Node):
         _cfg.set('Network', 'listenProxyPort',  str(self.listenProxyPort) )
         
         _cfg.add_section('Timer')
-        _cfg.set('Timer',   'interval', str(self.timer))
+        _cfg.set('Timer',   'interval', str(self.interval))
         
         self.write_config(_cfg)
         
@@ -110,12 +109,41 @@ class Disp(Node):
     listenPeerPort = disp_listenPeerPort
     listenProxyPort = disp_listenProxyPort
     
-class Proxy(Node): 
-    _addr = 'localhost'
-    _nb = 0
+    path = '../disp/'
+    configs_path = 'configs/'
+    config_file = 'config_disp'
+    start_file = 'start_disp.sh'
+    template_file = 'template_start_disp'
     
-    interpreter = 'pypy'
-
+    _all = list()
+    
+    def __init__(self):
+        self.addr = Disp._addr
+        self.listenProxyPort = disp_listenProxyPort
+        self.listenPeerPort = disp_listenPeerPort
+        self.interval = interval
+        self.config_file = Disp.config_file + '.cfg'
+        
+        Disp._all.append(self)
+    
+    def make_config(self):
+        _cfg = ConfigParser()
+        _cfg.optionxform=str
+        
+        _cfg.add_section('Network')
+        
+        _cfg.set('Network', 'listenPeerAddr',   str(self.addr) )
+        _cfg.set('Network', 'listenPeerPort',   str(self.listenPeerPort) )
+        
+        _cfg.set('Network', 'listenProxyAddr',  str(self.addr) )
+        _cfg.set('Network', 'listenProxyPort',  str(self.listenProxyPort) )
+        
+        _cfg.add_section('Timer')
+        _cfg.set('Timer',   'interval', str(self.interval))
+        
+        self.write_config(_cfg)
+        
+class Proxy(Node): 
     path = '../proxy/'
     configs_path = 'configs/'
     config_file = 'config_proxy'
@@ -129,7 +157,7 @@ class Proxy(Node):
         self.listenDispPort = proxy_listenDispPort+i
         self.listenProxyPort = proxy_listenProxyPort+i
         self.listenPeerPort = proxy_listenPeerPort+i
-        self.timer = timer
+        self.interval = interval
         self.config_file = Proxy.config_file + str(i) + '.cfg'
         
         Proxy._all.append(self)
@@ -151,13 +179,14 @@ class Proxy(Node):
         _cfg.set('Network', 'listenProxyPort',  str(self.listenProxyPort) )
         
         _cfg.add_section('Timer')
-        _cfg.set('Timer',   'interval', str(self.timer))
+        _cfg.set('Timer',   'interval', str(interval))
         
         self.write_config(_cfg)
     
 
 # TODO
-class GlobalConfig(object): pass
+class GlobalConfig(object):
+    pass
     
 def load_global_config(_config_file):
     """ Open the global config file and load all parameters
@@ -197,6 +226,9 @@ if __name__ == '__main__':
     load_global_config(args.config)
     
     # disp
+    Disp().make_config()
+    
+    Disp.make_start_file()
     
     # peers
     [Peer(Peer._addr, i) for i in range(Peer._nb)]    
@@ -210,7 +242,6 @@ if __name__ == '__main__':
         
     Proxy.make_start_file()
     
-    disp = None
     
 
         
