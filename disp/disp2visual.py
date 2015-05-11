@@ -62,10 +62,39 @@ class Monitor(WebSocketServerProtocol):
         report = [self.get_report(ph) for ph in  self.disp.peers.keys()]
         #print report
         #report = [self.get_empty_report('alpha', 20, 10), self.get_empty_report('beta', 100, 100)]
+        
         self.sendMessage(json.dumps(report))
         report = []
 
 
+class Monitor2():
+    def __init__(self):
+        print "monitor connected" 
+        self.i=1
+        self.refresh = 2.0 # refresh data every 2 seconds
+        self.out_file = open('results', 'w')
+        
+        LoopingCall(self.updateData).start(self.refresh,now=False)
+    
+    def get_report(self, peer_host):
+        # self.peers[tuple(_peer_host)] = (_coverage, _barycenter)
+        peer=self.disp.peers[peer_host]
+        return dict(
+                id = peer_host,
+                x = (peer[0][0][0]-3000)/25,
+                y = (peer[0][0][1]-800)/31.2,
+                width = (peer[0][1][0]-peer[0][0][0])/25,
+                height = (peer[0][1][1]-peer[0][0][1])/31.2,
+                bc_x = (peer[1][0]-3000)/25,
+                bc_y = (peer[1][1]-800)/31.2,
+                object_load = peer[2]
+                )
+                            
+    def updateData(self):
+        #print "updata", self.__class__.report
+        report = [self.get_report(ph) for ph in  self.disp.peers.keys()]
+        self.out_file.writelines(json.dumps(report))
+        
 from twisted.web import server, resource
 from twisted.internet import reactor, fdesc
 import os
