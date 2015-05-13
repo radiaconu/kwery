@@ -74,7 +74,7 @@ class Disp(Runnable):
      
     def handle_insert_object(self, _id, _value, _proxy_host):
         if not self.peers:
-           return     
+            return     
         
         def increases_area(_value, _peer):
             _min_value, _max_value = list(_peer[0][0]), list(_peer[0][1])            
@@ -92,16 +92,28 @@ class Disp(Runnable):
             surface = increases_area(_value, _peer)
             number = _peer[2]
             
-            print _peer
-            print distance, surface, number
-            return surface
+            #print _peer
+            #print distance, surface, number
+            return number+distance
         
         def print_product_metric(_value, _peer):
             distance = abs(_value[0]-_peer[1][0]) + abs(_value[1]-_peer[1][1])
             surface = increases_area(_value, _peer)
             number = _peer[2]
             print '***', distance, surface, number
-            
+        
+#        v= self.peers.keys()
+#        print v
+#        if _value[0] < 500:
+#            if _value[1]<500:
+#                peer =v[0]
+#            else:
+#                peer = v[1]
+#        else:
+#            if _value[1]<500:
+#                peer = v[2]
+#            else:
+#                peer = v[3]
         peer = min(self.peers.keys(), key=lambda p: product_metric(_value, self.peers[p]))
         print_product_metric(_value, self.peers[peer])
         
@@ -117,11 +129,11 @@ class Disp(Runnable):
 #        if not peer:
 #            print 'min'
 #            peer = min(all_increases.keys(), key=lambda p: all_increases[p])
-#           
-#        #peer = next((p for p in self.peers.keys() if self.peers[p][2]==0), None)
-#        #if peer is None:         
-#        #    peer = min(self.peers.keys(), key=lambda p: increases_area(_value, self.peers[p]))
-#            # abs(_value[0]-self.peers[p][1][0])**2+abs(_value[1]-self.peers[p][1][1])**2 )
+           
+        #peer = next((p for p in self.peers.keys() if self.peers[p][2]==0), None)
+        #if peer is None:         
+        #    peer = min(self.peers.keys(), key=lambda p: increases_area(_value, self.peers[p]))
+            # abs(_value[0]-self.peers[p][1][0])**2+abs(_value[1]-self.peers[p][1][1])**2 )
         
         self.disp2peer.send_insert(_id, _value, _proxy_host, peer)
         

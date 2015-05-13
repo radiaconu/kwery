@@ -59,8 +59,10 @@ class Proxy(Runnable):
     
     def handle_notification(self, _ids, _peer_host):
         """ From peer """
-        print "notif", _ids, _peer_host
+        
         for _id in _ids:
+            if self.id2peer.get(_id) is not _peer_host:
+                print "notif", _id, self.id2peer.get(_id), _peer_host
             self.id2peer[_id] = _peer_host
         
     def generate_points(self):

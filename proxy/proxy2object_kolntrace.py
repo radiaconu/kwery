@@ -29,7 +29,7 @@ class Parser:
         cur_time = int(cur_values[0])
         
         sent = 0
-        while sent < 10:
+        while sent < 100:
             try:
                 _id = cur_values[1]
                 if _id in ids:

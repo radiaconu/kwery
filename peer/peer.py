@@ -39,36 +39,47 @@ class Peer(Runnable):
         self.id2last_insert = dict() # obj id -> time
         
         self.loop_send_update = LoopingCall(self.peer2disp.send_update)
-        self.loop_send_update.start(self.config.UPDATE_INTERVAL/2)
+        self.loop_send_update.start(self.config.UPDATE_INTERVAL/4)
         
         self.loop_cleanup = LoopingCall(self.cleanup)
         self.loop_cleanup.start(self.config.UPDATE_INTERVAL)
         # self.cpu_loop.start(10, now=False)
+    
+    def handle_insert(self, _id, _value, _proxy_host):
+        print "insert", _id
+        now = time.time()
+        
+        self.index.put(_id, _value)
+        self.id2proxy[_id] = _proxy_host
+        self.id2last_insert[_id] = now
+        self.id2last_update[_id] = now
+        self.peer2proxy.send_notification([_id], _proxy_host)
 
-    def handle_put(self, _id, _value, _proxy_host, _force = False):
+    def handle_put(self, _id, _value, _proxy_host):
+        if not self.id2last_insert.get(_id):
+            return
+            
         now = time.time()
         put = True
         
-        if not _force:
-            self.index.coverage()
-            bc=self.index.get_bc()
-            w = self.index.get_width()
-            h = self.index.get_height()
+        self.index.coverage()
+        bc=self.index.get_bc()
+        w = self.index.get_width()
+        h = self.index.get_height()
             
-            if self.index.is_indexed(_id) and not self.index.is_covered(_value) and self.index.load()>10:
-                if now - self.id2last_insert[_id] > 1:
-                    put=False
-            #elif abs(_value[0]-bc[0]) > w*.8 or abs(_value[1]-bc[1]) > h*.8:
-            #    put = False
+        if self.index.is_indexed(_id) and not self.index.is_covered(_value) and self.index.load()>10:
+            if now - self.id2last_insert[_id] > 2:
+                put=False
+        #elif abs(_value[0]-bc[0]) > w*.8 or abs(_value[1]-bc[1]) > h*.8:
+        #    put = False
             
         if put: 
             self.index.put(_id, _value)
             self.id2proxy[_id] = _proxy_host
-            if not self.id2last_insert.get(_id):
-                self.id2last_insert[_id] = now
             self.id2last_update[_id] = now
             self.peer2proxy.send_notification([_id], _proxy_host)
         else:
+            print "transfer", _id
             self.index.remove(_id)
             self.id2last_insert.pop(_id, None)
             self.id2last_update.pop(_id, None)
@@ -83,7 +94,7 @@ class Peer(Runnable):
         now = time.time()
         for _id, _last_update in self.id2last_update.items():
             if now-_last_update > 2:
-                print "cleanup", _id
+                #print "cleanup", _id
                 self.index.remove(_id)
                 self.id2last_insert.pop(_id)
                 self.id2last_update.pop(_id)
