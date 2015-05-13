@@ -11,15 +11,12 @@ Diaspatcher2Monitor communication:
 
 from templates.node2node import Node2Node, Node2Node_from, Node2Node_to
 
-class Disp2Proxy_to(Node2Node_to):
-    pass
-
 from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol, listenWS #
 from twisted.internet.task import LoopingCall
 import json as json
 
 
-class Monitor(WebSocketServerProtocol):
+class Disp2Visual_to(WebSocketServerProtocol):
     
     def onConnect(self,request):
         print "monitor connected" 
@@ -33,12 +30,12 @@ class Monitor(WebSocketServerProtocol):
         peer=self.disp.peers[peer_host]
         return dict(
                 id = peer_host,
-                x = (peer[0][0][0]-3000)/25,
-                y = (peer[0][0][1]-800)/31.2,
-                width = (peer[0][1][0]-peer[0][0][0])/25,
-                height = (peer[0][1][1]-peer[0][0][1])/31.2,
-                bc_x = (peer[1][0]-3000)/25,
-                bc_y = (peer[1][1]-800)/31.2,
+                x = peer[0][0][0], # (peer[0][0][0]-3000)/25,
+                y = peer[0][0][1], # (peer[0][0][1]-800)/31.2,
+                width = (peer[0][1][0]-peer[0][0][0]), # /25,
+                height = (peer[0][1][1]-peer[0][0][1]), #/31.2,
+                bc_x = peer[1][0], # (peer[1][0]-3000)/25,
+                bc_y = peer[1][1], # (peer[1][1]-800)/31.2,
                 object_load = peer[2]
                 )
     
@@ -58,18 +55,17 @@ class Monitor(WebSocketServerProtocol):
                 )
                             
     def updateData(self):
-        #print "updata", self.__class__.report
         report = [self.get_report(ph) for ph in  self.disp.peers.keys()]
-        #print report
         #report = [self.get_empty_report('alpha', 20, 10), self.get_empty_report('beta', 100, 100)]
         
         self.sendMessage(json.dumps(report))
         report = []
 
 
-class Monitor2():
-    def __init__(self):
-        print "monitor connected" 
+class Disp2Visual_to_file():
+    def __init__(self, _disp):
+        self.disp = _disp
+        print "Disp2Visual_to_file started" 
         self.i=1
         self.refresh = 2.0 # refresh data every 2 seconds
         self.out_file = open('results', 'w')
@@ -77,95 +73,61 @@ class Monitor2():
         LoopingCall(self.updateData).start(self.refresh,now=False)
     
     def get_report(self, peer_host):
-        # self.peers[tuple(_peer_host)] = (_coverage, _barycenter)
         peer=self.disp.peers[peer_host]
         return dict(
                 id = peer_host,
-                x = (peer[0][0][0]-3000)/25,
-                y = (peer[0][0][1]-800)/31.2,
-                width = (peer[0][1][0]-peer[0][0][0])/25,
-                height = (peer[0][1][1]-peer[0][0][1])/31.2,
-                bc_x = (peer[1][0]-3000)/25,
-                bc_y = (peer[1][1]-800)/31.2,
+                x = peer[0][0][0], # (peer[0][0][0]-3000)/25,
+                y = peer[0][0][1], # (peer[0][0][1]-800)/31.2,
+                width = (peer[0][1][0]-peer[0][0][0]), # /25,
+                height = (peer[0][1][1]-peer[0][0][1]), #/31.2,
+                bc_x = peer[1][0], # (peer[1][0]-3000)/25,
+                bc_y = peer[1][1], # (peer[1][1]-800)/31.2,
                 object_load = peer[2]
                 )
                             
     def updateData(self):
         #print "updata", self.__class__.report
         report = [self.get_report(ph) for ph in  self.disp.peers.keys()]
-        self.out_file.writelines(json.dumps(report))
-        
-from twisted.web import server, resource
-from twisted.internet import reactor, fdesc
-import os
+        self.out_file.write(json.dumps(report))
+        self.out_file.write('\n')
 
-class MonitorWebServer(resource.Resource):
-    """ getproxy restfull call with jsonp
-    """        
-    isLeaf = True
-    def render_GET(self, request):        
-        getattr(self, request.args.get("action")[0])(request)
+class Disp2Visual_from_file(WebSocketServerProtocol):
+    def onConnect(self,request):
+        print "Disp2Visual_from_file connected" 
+        self.refresh = 2.0 # refresh data every 2 seconds
+        self.in_file = open('results', 'r')
         
-        returnvalue =  json.dumps(None)
-        callback = request.args.get("callback")
-        jsonp = request.args.get("jsonp")
-        if callback or jsonp:
-            if callback: callback = callback[0]
-            else: callback = jsonp[0]
-            
-            returnvalue = "%s(%s)" % (callback, returnvalue )
-        
-        return returnvalue
+        LoopingCall(self.updateData).start(self.refresh,now=False)
     
-    def clear(self, request):
-        if os.path.exists('stats.dat'):
-            os.remove('stats.dat')
+#    def get_report(self, peer_host):
+#        peer = json.loads(self.in_file.readline())
+#        print peer
         
-        self.fd = open('stats.dat', 'w')
-        fdesc.setNonBlocking(self.fd.fileno())
-        fdesc.writeToFD(self.fd.fileno(), 'a, b, c, d, e, f, g, \n')        
-        self.fd.close()
-    
-    def store(self, request):
-        monitor_total_obj = float(request.args.get("obj")[0])
+    def updateData(self):
+        self.sendMessage(self.in_file.readline())
         
-        self.fd = open('stats.dat', 'a')
-        fdesc.setNonBlocking(self.fd.fileno())
+class Disp2Visual:
+    def __init__(self, _disp):
+        self.disp = _disp
         
-        total_ticks = 0
-        total_own_obj = 0
-        total_nb_obj = 0
-        min_ticks = 100
+#        # to file, no visualiser
+#        Disp2Visual_to_file(_disp)
+#        return
         
-        for zone in self.dispatcher.zones.itervalues():
-            total_ticks += zone.ticks
-            total_own_obj += zone.own_obj
-            total_nb_obj += zone.nb_obj
-            if zone.ticks<min_ticks: min_ticks = zone.ticks
+#        # from file, only visual
+#        Disp2Visual_from_file.disp = _disp
+#        socketurl = 'ws://localhost:9997'
+#        factory = WebSocketServerFactory(socketurl)
+#        factory.protocol = Disp2Visual_from_file
+#        listenWS(factory)
+#        print "Websocket",socketurl,"ok ..."
+#        return
+#        
+        # live, connect to monitor websocket
+        Disp2Visual_to.disp = _disp
+        socketurl = 'ws://localhost:9997'
+        factory = WebSocketServerFactory(socketurl)
+        factory.protocol = Disp2Visual_to
+        listenWS(factory)
+        print "Websocket",socketurl,"ok ..."
         
-        
-        nzones = len(self.dispatcher.zones)
-        delay_avg = nzones/total_ticks
-        delay_max = 1./min_ticks
-        
-        avg_own_obj = total_own_obj/nzones
-        avg_nb_obj = total_nb_obj/nzones
-        
-        overlap = float(total_nb_obj)/total_own_obj
-        fdesc.writeToFD(self.fd.fileno(), 
-                        str(monitor_total_obj)+', '+str(nzones)+', '+str(delay_avg)+', '+str(delay_max)+\
-                        ', '+str(avg_own_obj)+', '+str(avg_nb_obj)+', '+str(overlap)+', \n')
-        
-        self.fd.close()
-        
-class Disp2Monitor(object):
-    def __init__(self, dispatcher):
-        webserver = resource.Resource()
-        mws = MonitorWebServer()
-        mws.dispatcher = dispatcher
-        webserver.putChild('',mws)
-    
-        site = server.Site(webserver)
-        reactor.listenTCP(7357, site)
-        print "Disp2Monitor running on, 7357 "
-    

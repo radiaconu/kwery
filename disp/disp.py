@@ -19,8 +19,7 @@ from disp2proxy import Disp2Proxy
 
 from twisted.internet import reactor
 
-from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketClientFactory, WebSocketServerProtocol, listenWS #
-from disp2visual import Monitor, Disp2Monitor
+from disp2visual import Disp2Visual
 
 import sys
 sys.path.append('..')
@@ -54,20 +53,7 @@ class Disp(Runnable):
         # effectively open connections
         self.disp2proxy = Disp2Proxy(self)
         self.disp2peer = Disp2Peer(self)
-        
-        ############
-        
-        #connect to monitor websocket
-        Monitor.disp = self
-        socketurl = 'ws://localhost:9997'
-        factory = WebSocketServerFactory(socketurl)
-        factory.protocol = Monitor
-        listenWS(factory)
-        print "Websocket",socketurl,"ok ..."
-        
-        #Disp2Monitor(self)
-        
-        ############
+        self.disp2visual = Disp2Visual(self)
         
         # data management
         self.peers = dict() # host -> value
@@ -101,28 +87,46 @@ class Disp(Runnable):
             
             return a2-a1
         
-        all_increases = {p:increases_area(_value, self.peers[p]) for p in self.peers.keys()}
-        all_increases0 = {p:all_increases[p] for p in all_increases.keys() if all_increases[p]==0}
-        if all_increases0:
-            print '+0'
-            peer = min(all_increases0.keys(), key=lambda p:(abs(_value[0]-self.peers[p][1][0])+ abs(_value[1]-self.peers[p][1][1]) ))
-            #peer = min(all_increases0.keys(), key=lambda p:self.peers[p][2])
-        else:
-            print 'o'
-            peer = next((p for p in self.peers.keys() if self.peers[p][2]<10), None)
-        if not peer:
-            print 'min'
-            peer = min(all_increases.keys(), key=lambda p: all_increases[p])
-           
-        #peer = next((p for p in self.peers.keys() if self.peers[p][2]==0), None)
-        #if peer is None:         
-        #    peer = min(self.peers.keys(), key=lambda p: increases_area(_value, self.peers[p]))
-            # abs(_value[0]-self.peers[p][1][0])**2+abs(_value[1]-self.peers[p][1][1])**2 )
+        def product_metric(_value, _peer):
+            distance = abs(_value[0]-_peer[1][0]) + abs(_value[1]-_peer[1][1])
+            surface = increases_area(_value, _peer)
+            number = _peer[2]
+            
+            print _peer
+            print distance, surface, number
+            return surface
+        
+        def print_product_metric(_value, _peer):
+            distance = abs(_value[0]-_peer[1][0]) + abs(_value[1]-_peer[1][1])
+            surface = increases_area(_value, _peer)
+            number = _peer[2]
+            print '***', distance, surface, number
+            
+        peer = min(self.peers.keys(), key=lambda p: product_metric(_value, self.peers[p]))
+        print_product_metric(_value, self.peers[peer])
+        
+#        all_increases = {p:increases_area(_value, self.peers[p]) for p in self.peers.keys()}
+#        all_increases0 = {p:all_increases[p] for p in all_increases.keys() if all_increases[p]==0}
+#        if all_increases0:
+#            print '+0'
+#            peer = min(all_increases0.keys(), key=lambda p:(abs(_value[0]-self.peers[p][1][0])+ abs(_value[1]-self.peers[p][1][1]) ))
+#            #peer = min(all_increases0.keys(), key=lambda p:self.peers[p][2])
+#        else:
+#            print 'o'
+#            peer = next((p for p in self.peers.keys() if self.peers[p][2]<10), None)
+#        if not peer:
+#            print 'min'
+#            peer = min(all_increases.keys(), key=lambda p: all_increases[p])
+#           
+#        #peer = next((p for p in self.peers.keys() if self.peers[p][2]==0), None)
+#        #if peer is None:         
+#        #    peer = min(self.peers.keys(), key=lambda p: increases_area(_value, self.peers[p]))
+#            # abs(_value[0]-self.peers[p][1][0])**2+abs(_value[1]-self.peers[p][1][1])**2 )
         
         self.disp2peer.send_insert(_id, _value, _proxy_host, peer)
         
     def handle_update_peer(self, _coverage, _barycenter, _object_load, _peer_host):
-        print 'update peer'
+        #print 'update peer'
         self.peers[tuple(_peer_host)] = (_coverage, _barycenter, _object_load)
         
     def handle_query_received(self, _query_id, _min_value, _max_value, _proxy_host):

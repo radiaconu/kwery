@@ -33,8 +33,8 @@ class Parser:
             try:
                 _id = cur_values[1]
                 if _id in ids:
-                    lng = float(cur_values[2])
-                    lat = float(cur_values[3])
+                    lng = (float(cur_values[2])-3000)/25
+                    lat = (float(cur_values[3])-800)/31.2
                     sent +=1 
                     self.proxy.handle_put(_id, (lng, lat))
                     

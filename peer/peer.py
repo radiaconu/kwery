@@ -39,7 +39,7 @@ class Peer(Runnable):
         self.id2last_insert = dict() # obj id -> time
         
         self.loop_send_update = LoopingCall(self.peer2disp.send_update)
-        self.loop_send_update.start(self.config.UPDATE_INTERVAL)
+        self.loop_send_update.start(self.config.UPDATE_INTERVAL/2)
         
         self.loop_cleanup = LoopingCall(self.cleanup)
         self.loop_cleanup.start(self.config.UPDATE_INTERVAL)
@@ -55,11 +55,11 @@ class Peer(Runnable):
             w = self.index.get_width()
             h = self.index.get_height()
             
-            if self.index.is_indexed(_id) and not self.index.is_covered(_value):
-                if now - self.id2last_insert[_id] > 2:
+            if self.index.is_indexed(_id) and not self.index.is_covered(_value) and self.index.load()>10:
+                if now - self.id2last_insert[_id] > 1:
                     put=False
-            elif abs(_value[0]-bc[0]) > w*.8 or abs(_value[1]-bc[1]) > h*.8:
-                put = False
+            #elif abs(_value[0]-bc[0]) > w*.8 or abs(_value[1]-bc[1]) > h*.8:
+            #    put = False
             
         if put: 
             self.index.put(_id, _value)
