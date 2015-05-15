@@ -24,6 +24,7 @@ class Parser:
         self.file.seek(0)
         
     def simulate(self, ids):
+        self.file.seek(0)
         cur_line = self.file.readline()
         cur_values = cur_line.split()
         cur_time = int(cur_values[0])
@@ -50,18 +51,53 @@ class Parser:
             
             
 
-    def pick_ids(self, nb):
+    def pick_ids(self, nb_obj, nb_rounds):
+        """ this is quick and dirty; to be revised. """
         self.file.seek(0)
-        ids = set()
+        ids=set()
         
-        while len(ids)<nb:
-            cur_line = self.file.readline()
-            cur_values = cur_line.split()
-            ids.add(cur_values[1])
+        nb = 0
         
+        while nb < nb_rounds:
+            nb +=1
+            
+            while len(ids) < nb*nb_obj:
+                cur_line = self.file.readline()
+                cur_values = cur_line.split()
+                try:
+                    ids.add(cur_values[1])
+                except Exception:
+                    if not cur_line:
+                        print 'eof', nb, len(ids)
+                        self.file.seek(0)
+            
+            
+            time_1 = int(cur_values[0])
+            
+            while int(cur_values[0]) is time_1:
+                cur_line = self.file.readline()
+                cur_values = cur_line.split()
         
         self.file.seek(0)
+        #print ids
+        print len(ids)
         return ids
+    
+    def dump_ids(self, _ids, n):
+        import random
+        ids = [[] for _ in range(n)]
+        print ids
+        for i in _ids:
+            random.choice(ids).append(i)
+        for i in range(n):
+            print len(ids[i])
+            _file = open('ids_'+str(i), 'w')
+            
+            for _ in ids[i]:
+                _file.write(u"%s\n" %_)
+            
+    def load_ids(self, _file):
+        return set(l.split()[0] for l in _file.readlines())
     
     def search(self):
         self.file.seek(0)
@@ -85,12 +121,17 @@ class Parser:
         self.file.seek(0)
         
 class Proxy2Object:
-    def __init__(self, _proxy):
+    def __init__(self, _proxy, ids_file='ids_0'):
         self.proxy = _proxy
         
         parser = Parser()
         parser.proxy = _proxy
         #parser.search()
-        ids = parser.pick_ids(10000)
+        
+#        ids = parser.pick_ids(1000, 100)
+#        parser.dump_ids(ids, 5)
+        
+        ids=parser.load_ids(open(ids_file))
+        print ids
         parser.simulate(ids)
         

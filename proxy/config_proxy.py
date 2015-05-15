@@ -30,3 +30,4 @@ class ConfigProxy(Config):
         self.listenPeerAddr = parser.get('Network', 'listenPeerAddr')
         self.listenPeerPort = parser.getint('Network', 'listenPeerPort')
         
+        self.UPDATE_INTERVAL = 2

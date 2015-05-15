@@ -5,7 +5,10 @@
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-    <div id="viz"></div>
+    
+    <div id="viz" style="width: 1000px; float:left;"></div>
+    <div id="datatable" style="width: 500px; float:right;"></div>
+
     <script type="text/javascript">
 
     var globalSVG = d3.select("#viz")
@@ -150,6 +153,5 @@
         connectws(); 
     </script>
 
-    <div id="datatable" style="width: 500px; float:left;"></div>
 </body>
 </html>

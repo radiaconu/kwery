@@ -23,6 +23,10 @@ import sys
 sys.path.append('..')
 from templates.runnable import Runnable
 
+from twisted.internet.task import LoopingCall
+
+import time
+
 class Proxy(Runnable):
     def __init__(self, _config_file='configProxyDefault.cfg'):
         # singleton 
@@ -39,8 +43,13 @@ class Proxy(Runnable):
         # data management
         self.objects = dict()
         self.id2peer = dict()
+        self.id2last_notif = dict()
         self.queries = dict() # id -> objects
         # TODO: management of recent removals that continue to receive updates
+        
+        
+        self.loop_cleanup = LoopingCall(self.cleanup)
+        self.loop_cleanup.start(self.config.UPDATE_INTERVAL)
     
     def handle_put(self, _id, _value):
         """ From object """        
@@ -55,10 +64,10 @@ class Proxy(Runnable):
         pass
     
     def handle_remove(self, _id):
-        if self.objects.get(_id):
-            self.proxy2peer.send_remove()
-            self.objects.pop(_id)
-            self.id2peer.pop(_id)
+        #if self.objects.get(_id):
+        #    self.proxy2peer.send_remove()
+            self.objects.pop(_id, None)
+            self.id2peer.pop(_id, None)
             
     def handle_query_answer_peers(self, _query_id, _objects):
         """ From peer(s) """
@@ -71,7 +80,17 @@ class Proxy(Runnable):
             if self.id2peer.get(_id) is not _peer_host:
                 print "notif", _id, self.id2peer.get(_id), _peer_host
             self.id2peer[_id] = _peer_host
-        
+            self.id2last_notif[_id] = time.time()
+    
+    def cleanup(self):
+        now = time.time()
+        for _id, _last_notif in self.id2last_notif.items():
+            if now-_last_notif > 2:
+                print 'cleanup', _id
+                self.id2peer.pop(_id, None)
+                self.id2last_notif.pop(_id, None)
+                #self.handle_remove(_id)
+                
     def generate_points(self):
         # generate some points:
         print "generate some points "

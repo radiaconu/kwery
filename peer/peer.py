@@ -74,6 +74,7 @@ class Peer(Runnable):
         #    put = False
             
         if put: 
+            print 'put', self.index.objects[_id], _value
             self.index.put(_id, _value)
             self.id2proxy[_id] = _proxy_host
             self.id2last_update[_id] = now
@@ -91,16 +92,19 @@ class Peer(Runnable):
         self.peer2proxy.send_query_answer(_query_id, result, _proxy_host)
     
     def handle_remove(self, _id):
+        #if self.id2proxy.get(_id):
+        #    self.peer2proxy.send_remove(_id, self._id2proxy[_id])
+            
         self.index.remove(_id)
         self.id2last_insert.pop(_id)
         self.id2last_update.pop(_id)
         self.id2proxy.pop(_id)
         
+        
     def cleanup(self):
         now = time.time()
         for _id, _last_update in self.id2last_update.items():
             if now-_last_update > 2:
-                #print "cleanup", _id
                 self.handle_remove(_id)
     
 #    def cpu_time(self):
