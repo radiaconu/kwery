@@ -29,7 +29,11 @@ class Proxy2Peer_to(Node2Node_to):
         msg = ('put', _id, _value, self.host)
         print "put", _id
         self._send(msg, _peer)
-    
+        
+    def send_remove(self, _id, _peer):
+        """ Structure: 'remove', _id, (_proxy_addr, _proxy_port) """
+        msg = ('remove', _id, self.host)
+        self._send(msg, _peer)
         
 class Proxy2Peer(Node2Node, Proxy2Peer_from, Proxy2Peer_to):
     def __init__(self, _proxy):

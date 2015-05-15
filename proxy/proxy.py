@@ -40,6 +40,7 @@ class Proxy(Runnable):
         self.objects = dict()
         self.id2peer = dict()
         self.queries = dict() # id -> objects
+        # TODO: management of recent removals that continue to receive updates
     
     def handle_put(self, _id, _value):
         """ From object """        
@@ -53,6 +54,12 @@ class Proxy(Runnable):
         """ From client TODO """
         pass
     
+    def handle_remove(self, _id):
+        if self.objects.get(_id):
+            self.proxy2peer.send_remove()
+            self.objects.pop(_id)
+            self.id2peer.pop(_id)
+            
     def handle_query_answer_peers(self, _query_id, _objects):
         """ From peer(s) """
         self.queries[_query_id] = _objects

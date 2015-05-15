@@ -23,6 +23,11 @@ class Peer2Proxy_from(Node2Node_from):
     def received_put(self,_id, _value, _proxy_host):
         """ Structure: 'put', _id, _value, (_proxy_addr, _proxy_port) """
         self.peer.handle_put(_id, _value, _proxy_host)
+        
+    def received_remove(self,_id, _proxy_host):
+        """ Structure: 'remove', _id, _value, (_proxy_addr, _proxy_port) """
+        #if self.peer.id2proxy.get(_id) is _proxy_host:
+        self.peer.handle_remove(_id, _proxy_host)
 
 class Peer2Proxy(Node2Node, Peer2Proxy_from, Peer2Proxy_to):
     

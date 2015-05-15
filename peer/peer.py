@@ -89,16 +89,19 @@ class Peer(Runnable):
     def handle_get(self, _query_id, _min_value, _max_value, _proxy_host):
         result = self.index.get(_min_value, _max_value)
         self.peer2proxy.send_query_answer(_query_id, result, _proxy_host)
+    
+    def handle_remove(self, _id):
+        self.index.remove(_id)
+        self.id2last_insert.pop(_id)
+        self.id2last_update.pop(_id)
+        self.id2proxy.pop(_id)
         
     def cleanup(self):
         now = time.time()
         for _id, _last_update in self.id2last_update.items():
             if now-_last_update > 2:
                 #print "cleanup", _id
-                self.index.remove(_id)
-                self.id2last_insert.pop(_id)
-                self.id2last_update.pop(_id)
-                self.id2proxy.pop(_id)
+                self.handle_remove(_id)
     
 #    def cpu_time(self):
 #        t = os.times()
