@@ -9,10 +9,10 @@ Diaspatcher2Monitor communication:
  * uni-directional, sends data
 """
 
-from templates.node2node import Node2Node, Node2Node_from, Node2Node_to
+#from templates.node2node import Node2Node, Node2Node_from, Node2Node_to
 
-from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol, listenWS #
-from twisted.internet.task import LoopingCall
+#from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol, listenWS #
+#from twisted.internet.task import LoopingCall
 import json as json
 
 
