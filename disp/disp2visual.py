@@ -91,20 +91,17 @@ class Disp2Visual_to_file():
         self.out_file.write(json.dumps(report))
         self.out_file.write('\n')
 
-class Disp2Visual_from_file(WebSocketServerProtocol):
-    def onConnect(self,request):
-        print "Disp2Visual_from_file connected" 
-        self.refresh = 2.0 # refresh data every 2 seconds
-        self.in_file = open('results', 'r')
+#class Disp2Visual_from_file(WebSocketServerProtocol):
+#    def onConnect(self,request):
+#        print "Disp2Visual_from_file connected" 
+#        self.refresh = 2.0 # refresh data every 2 seconds
+#        self.in_file = open('results', 'r')
+#        
+#        LoopingCall(self.updateData).start(self.refresh,now=False)
+#    
         
-        LoopingCall(self.updateData).start(self.refresh,now=False)
-    
-#    def get_report(self, peer_host):
-#        peer = json.loads(self.in_file.readline())
-#        print peer
-        
-    def updateData(self):
-        self.sendMessage(self.in_file.readline())
+#    def updateData(self):
+#        self.sendMessage(self.in_file.readline())
         
 class Disp2Visual:
     def __init__(self, _disp):
