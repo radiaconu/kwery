@@ -24,7 +24,7 @@ class Parser:
         self.file.seek(0)
         
     def simulate(self, ids):
-        self.file.seek(0)
+        #self.file.seek(0)
         cur_line = self.file.readline()
         cur_values = cur_line.split()
         cur_time = int(cur_values[0])
@@ -121,7 +121,7 @@ class Parser:
         self.file.seek(0)
         
 class Proxy2Object:
-    def __init__(self, _proxy, ids_file='ids_0'):
+    def __init__(self, _proxy):
         self.proxy = _proxy
         
         parser = Parser()
@@ -131,7 +131,8 @@ class Proxy2Object:
 #        ids = parser.pick_ids(1000, 100)
 #        parser.dump_ids(ids, 5)
         
-        ids=parser.load_ids(open(ids_file))
+        ids=parser.load_ids(open(_proxy.config.ids_file))
         print ids
+        parser.refresh()
         parser.simulate(ids)
         

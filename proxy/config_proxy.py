@@ -9,7 +9,7 @@ Created on Fri Apr 24 16:26:23 2015
 Required correctly formatted input file. 
 Default value: 'configProxyDefault.cfg'
 
-TODO: Automatic config file generation
+TODO: revise test file param, loading etc
 """
 import sys
 sys.path.append('..')
@@ -29,5 +29,8 @@ class ConfigProxy(Config):
         
         self.listenPeerAddr = parser.get('Network', 'listenPeerAddr')
         self.listenPeerPort = parser.getint('Network', 'listenPeerPort')
+        
+        
+        self.ids_file = parser.get('Test', 'ids')
         
         self.UPDATE_INTERVAL = 2

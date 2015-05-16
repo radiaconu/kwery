@@ -162,6 +162,8 @@ class Proxy(Node):
         self.interval = interval
         self.config_file = Proxy.config_file + str(i) + '.cfg'
         
+        self.test_file = 'ids_'+str(i)
+        
         Proxy._all.append(self)
         
     def make_config(self):
@@ -182,6 +184,9 @@ class Proxy(Node):
         
         _cfg.add_section('Timer')
         _cfg.set('Timer',   'interval', str(interval))
+        
+        _cfg.add_section('Test')
+        _cfg.set('Test',   'ids', str(self.test_file))
         
         self.write_config(_cfg)
     

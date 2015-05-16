@@ -110,9 +110,9 @@ class Disp2Visual:
     def __init__(self, _disp):
         self.disp = _disp
         
-#        # to file, no visualiser
-#        Disp2Visual_to_file(_disp)
-#        return
+        # to file, no visualiser
+        Disp2Visual_to_file(_disp)
+        return
         
 #        # from file, only visual
 #        Disp2Visual_from_file.disp = _disp
@@ -123,11 +123,11 @@ class Disp2Visual:
 #        print "Websocket",socketurl,"ok ..."
 #        return
 #        
-        # live, connect to monitor websocket
-        Disp2Visual_to.disp = _disp
-        socketurl = 'ws://localhost:9997'
-        factory = WebSocketServerFactory(socketurl)
-        factory.protocol = Disp2Visual_to
-        listenWS(factory)
-        print "Websocket",socketurl,"ok ..."
+#        # live, connect to monitor websocket
+#        Disp2Visual_to.disp = _disp
+#        socketurl = 'ws://localhost:9997'
+#        factory = WebSocketServerFactory(socketurl)
+#        factory.protocol = Disp2Visual_to
+#        listenWS(factory)
+#        print "Websocket",socketurl,"ok ..."
         
