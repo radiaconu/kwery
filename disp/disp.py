@@ -94,8 +94,8 @@ class Disp(Runnable):
             
             #print _peer
             #print distance, surface, number
-            #if not number: return number
-            return number+distance
+            if not number: return number
+            return distance
         
         
         def update_peer(_peer, _value):
@@ -103,6 +103,9 @@ class Disp(Runnable):
             if  _value[1] < _peer[0][0][1]: _peer[0][0][1] = _value[1]
             if  _value[0] > _peer[0][1][0]: _peer[0][1][0] = _value[0]
             if  _value[1] > _peer[0][1][1]: _peer[0][1][1] = _value[1]            
+            _peer[1][0] = (_peer[1][0] * _peer[2] + _value[0] ) / (_peer[2]+1)
+            _peer[1][1] = (_peer[1][1] * _peer[2] + _value[1] ) / (_peer[2]+1)
+            _peer[2] += 1
             
 #        v= self.peers.keys()
 #        print v
@@ -141,7 +144,7 @@ class Disp(Runnable):
         
     def handle_update_peer(self, _coverage, _barycenter, _object_load, _peer_host):
         #print 'update peer'
-        self.peers[tuple(_peer_host)] = (_coverage, _barycenter, _object_load)
+        self.peers[tuple(_peer_host)] = [_coverage, _barycenter, _object_load]
         
     def handle_query_received(self, _query_id, _min_value, _max_value, _proxy_host):
         inters_peers = []
