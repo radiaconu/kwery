@@ -117,7 +117,7 @@ class Disp(Runnable):
 #            else:
 #                peer = v[3]
         peer = min(self.peers.keys(), key=lambda p: product_metric(_value, self.peers[p]))
-        update_peer(peer, _value)
+        update_peer(self.peers[peer], _value)
         
 #        all_increases = {p:increases_area(_value, self.peers[p]) for p in self.peers.keys()}
 #        all_increases0 = {p:all_increases[p] for p in all_increases.keys() if all_increases[p]==0}
