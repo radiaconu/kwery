@@ -94,14 +94,16 @@ class Disp(Runnable):
             
             #print _peer
             #print distance, surface, number
+            #if not number: return number
             return number+distance
         
-        def print_product_metric(_value, _peer):
-            distance = abs(_value[0]-_peer[1][0]) + abs(_value[1]-_peer[1][1])
-            surface = increases_area(_value, _peer)
-            number = _peer[2]
-            print '***', distance, surface, number
         
+        def update_peer(_peer, _value):
+            if  _value[0] < _peer[0][0][0]: _peer[0][0][0] = _value[0]
+            if  _value[1] < _peer[0][0][1]: _peer[0][0][1] = _value[1]
+            if  _value[0] > _peer[0][1][0]: _peer[0][1][0] = _value[0]
+            if  _value[1] > _peer[0][1][1]: _peer[0][1][1] = _value[1]            
+            
 #        v= self.peers.keys()
 #        print v
 #        if _value[0] < 500:
@@ -115,7 +117,7 @@ class Disp(Runnable):
 #            else:
 #                peer = v[3]
         peer = min(self.peers.keys(), key=lambda p: product_metric(_value, self.peers[p]))
-        print_product_metric(_value, self.peers[peer])
+        update_peer(peer, _value)
         
 #        all_increases = {p:increases_area(_value, self.peers[p]) for p in self.peers.keys()}
 #        all_increases0 = {p:all_increases[p] for p in all_increases.keys() if all_increases[p]==0}

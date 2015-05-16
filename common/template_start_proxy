@@ -2,6 +2,8 @@ if pgrep -f $name ; then echo 'node ', $name, 'is running'
 else
     cd $(dirname $0)
     nohup $interpreter proxy.py --c $name &
+    sleep 10 
+    # wait 10s before starting a new proxy
 fi
 # new line !!
 
