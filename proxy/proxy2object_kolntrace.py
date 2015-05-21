@@ -10,6 +10,8 @@ Replaces the proxy2object communication
 
 from twisted.internet import reactor
 
+import time
+
 class Parser:
     def __init__(self):
         self.file = open('kolntrace', 'r')
@@ -48,9 +50,45 @@ class Parser:
         if cur_time < self.end_time:
             reactor.callLater(0.2, self.simulate, ids)
         
+    
+    def simulate_with_time(self, ids):
+        cur_line = self.file.readline()
+        cur_values = cur_line.split()
+        cur_time = cur_values[0]
+        
+        
+        all_lines = []
+        print "loading all lines", cur_time
+        while cur_time == cur_values[0]:
+            last_pos = self.file.tell()
+            if cur_values[1] in ids: all_lines.append(cur_line)
             
+            cur_line = self.file.readline()
+            cur_values = cur_line.split()
+            if not cur_line: 
+                self.file.seek(0)
+        print "finished loading all lines", cur_values[0]
+        
+        self.file.seek(last_pos)
+        
+        nb  = len(all_lines)/10
+        while all_lines:
+            for i in range(nb):
+                try:
+                    cur_line = all_lines.pop()
+                    cur_values = cur_line.split()
+                    lng = (float(cur_values[2])-3000)/25
+                    lat = (float(cur_values[3])-800)/31.2
+                    _id = cur_values[1]
+                    self.proxy.handle_put(_id, (lng, lat))
+                except Exception, e:
+                    break
             
-
+            time.sleep(.01)
+            
+        self.simulate_with_time(ids)
+        
+        
     def pick_ids(self, nb_obj, nb_rounds):
         """ this is quick and dirty; to be revised. """
         self.file.seek(0)
@@ -83,7 +121,18 @@ class Parser:
         print len(ids)
         return ids
     
-    def dump_ids(self, _ids, n):
+    def dump_ids(self, _ids=None, n=4):
+        if not _ids:
+            _ids = set()
+            self.file.seek(0)
+            cur_line = self.file.readline()
+            while cur_line:
+                cur_values = cur_line.split()
+                _ids.add(cur_values[1])          
+                cur_line = self.file.readline()
+                
+        print "done...", len(_ids)
+        
         import random
         ids = [[] for _ in range(n)]
         print ids
@@ -119,6 +168,50 @@ class Parser:
             
         print (min_x, min_y),(max_x, max_y)
         self.file.seek(0)
+    
+    def count_time(self):
+        self.file.seek(0)
+        times = dict()
+        
+        cur_line = self.file.readline()
+        while cur_line:
+            cur_values = cur_line.split()
+            if not times.get(cur_values[0]): times[cur_values[0]] = 0
+            times[cur_values[0]] +=1
+            cur_line = self.file.readline()
+        
+        print 'max', max(times.values())
+        print 'min', min(times.values())
+            
+    def count_ids(self):
+        self.file.seek(0)
+        ids = set()
+        nb_lines = 0
+        
+        
+        cur_line = self.file.readline()
+        while cur_line:
+            cur_values = cur_line.split()
+            if len(cur_values[1]) < 10:
+                ids.add(cur_values[1])
+            else:
+                nb_lines +=1
+            cur_line = self.file.readline()
+        
+        print "nb_ids ", len(ids)
+        print "nb_lines weired", nb_lines
+        print "avg_updates/id", nb_lines/len(ids)
+#nb_secs        7201
+#nb_ids         121164
+#nb_short_ids   117484
+
+#nb_lines       75882909
+#nb_weired_lines 2087254
+#avg_updates/id 626
+
+#avg_ids/sec    10537
+
+        
         
 class Proxy2Object:
     def __init__(self, _proxy):
@@ -126,13 +219,16 @@ class Proxy2Object:
         
         parser = Parser()
         parser.proxy = _proxy
-        #parser.search()
         
-#        ids = parser.pick_ids(1000, 100)
-#        parser.dump_ids(ids, 5)
-        
+        print "loading file", _proxy.config.ids_file
         ids=parser.load_ids(open(_proxy.config.ids_file))
         print ids
         parser.refresh()
-        parser.simulate(ids)
+        parser.simulate_with_time(ids)
+
+#        ids = parser.pick_ids(1000, 100)
+#        parser.dump_ids()
         
+        
+#        parser.count_ids()
+#        parser.count_time()

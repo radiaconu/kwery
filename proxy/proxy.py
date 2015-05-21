@@ -82,6 +82,9 @@ class Proxy(Runnable):
             self.id2peer[_id] = _peer_host
             self.id2last_notif[_id] = time.time()
     
+    def handle_join(self, _client_host):
+        pass
+    
     def cleanup(self):
         now = time.time()
         for _id, _last_notif in self.id2last_notif.items():

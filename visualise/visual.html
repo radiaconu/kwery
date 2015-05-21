@@ -7,7 +7,7 @@
 <body>
     
     <div id="viz" style="width: 1000px; float:left;"></div>
-    <div id="datatable" style="width: 500px; float:right;"></div>
+    <div id="datatable" style="width: 530px; float:right;"></div>
 
     <script type="text/javascript">
 
@@ -119,16 +119,19 @@
                     bc_x = Number((report[zone]['bc_x']).toFixed(1)) ;
                     bc_y = Number((report[zone]['bc_y']).toFixed(1)) ;
                     
+                    
                     r[++j] ='<tr><td>';
                     r[++j] = id;
                     r[++j] = '</td><td>';
-                    r[++j] = x+', '+y;
-                    r[++j] = '</td><td>';
-                    r[++j] = width+', '+ height;
-                    r[++j] = '</td><td>';
-                    r[++j] = bc_x+', '+bc_y;
-                    r[++j] = '</td><td>';
                     r[++j] = report[zone]['object_load'];
+                    r[++j] = '</td><td>';
+                    r[++j] = report[zone].proxy_sent;
+                    r[++j] = '</td><td>';
+                    r[++j] = report[zone].proxy_received;
+                    r[++j] = '</td><td>';
+                    r[++j] = report[zone].disp_sent;
+                    r[++j] = '</td><td>';
+                    r[++j] = report[zone].disp_received;
                     r[++j] = '</td></tr>';
                     if(!rects.hasOwnProperty(id)){
                         rects[id]= new Rectangle(id, x, y, width, height, 's', bc_x, bc_y); 
@@ -137,7 +140,7 @@
                         rects[id].update(x, y, width, height, 'ss', bc_x, bc_y);
                     }
                 }//}
-                var s = "<table cellspacing='0'> <tr><th>Id</th><th>x, y</th><th>w, h</th><th>bc</th><th>load</th></tr></thead><tbody>"+r.join('')+"</tbody></table>";
+                var s = "<table cellspacing='0'> <tr><th>Id</th><th>load</th><th>proxy_s</th><th>proxy_r</th><th>disp_s</th><th>disp_r</th></tr></thead><tbody>"+r.join('')+"</tbody></table>";
                 document.getElementById('datatable').innerHTML = (s);             };
             ws.onclose = function(){
                 console.log("not ok");

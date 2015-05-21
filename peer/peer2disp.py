@@ -26,9 +26,11 @@ class Peer2Disp_to(Node2Node_to):
         coverage = self.peer.index.coverage()
         barycenter = self.peer.index.barycenter()
         object_load = self.peer.index.load()
+        sent_received = (self.peer.peer2proxy.get_sent(), self.peer.peer2proxy.get_received(),\
+                        self.peer.peer2disp.get_sent(), self.peer.peer2disp.get_received())
         #_value = (coverage, barycenter)
         
-        msg = ('update', coverage, barycenter, object_load, self.host)
+        msg = ('update', coverage, barycenter, object_load, sent_received, self.host)
         self._send(msg, (self._to_addr, self._to_port))
         
     def send_transfer(self, _id, _value, _proxy_host):
