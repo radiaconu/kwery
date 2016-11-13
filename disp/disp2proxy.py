@@ -21,6 +21,7 @@ class Disp2Proxy_from(Node2Node_from):
     
     def received_insert(self, _id, _value, _proxy_host):
         """ Structure: 'insert', _id, _value, (_proxy_addr, _proxy_port) """
+        print "insert", _id
         self.disp.handle_insert_object(_id, _value, _proxy_host)
     
     def received_get(self, _query_id, _min_value, _max_value, _proxy_host):

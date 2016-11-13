@@ -39,7 +39,7 @@ class Peer(Runnable):
         self.id2last_insert = dict() # obj id -> time
         
         self.loop_send_update = LoopingCall(self.peer2disp.send_update)
-        self.loop_send_update.start(self.config.UPDATE_INTERVAL/4)
+        self.loop_send_update.start(self.config.UPDATE_INTERVAL)
         
         self.loop_cleanup = LoopingCall(self.cleanup)
         self.loop_cleanup.start(self.config.UPDATE_INTERVAL)
