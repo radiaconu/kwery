@@ -142,9 +142,9 @@ class Disp(Runnable):
         
         self.disp2peer.send_insert(_id, _value, _proxy_host, peer)
         
-    def handle_update_peer(self, _coverage, _barycenter, _object_load, _peer_host):
+    def handle_update_peer(self, _coverage, _barycenter, _object_load, sent_received, _peer_host):
         #print 'update peer'
-        self.peers[tuple(_peer_host)] = [_coverage, _barycenter, _object_load]
+        self.peers[tuple(_peer_host)] = [_coverage, _barycenter, _object_load, sent_received]
         
     def handle_query_received(self, _query_id, _min_value, _max_value, _proxy_host):
         inters_peers = []

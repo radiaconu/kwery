@@ -4,10 +4,10 @@ Created on Fri Apr 24 15:09:30 2015
 
 @author: Raluca Diaconu (diaconu.raluca@gmail.com)
 
-TODO: put constans in config loading
+TODO: put constants in config loading
 TODO: proxies are in dict. all object params are in disct. shameful.
 """
-INTERVAL = 2
+
 from config_peer import ConfigPeer
 from peer2disp import Peer2Disp
 from peer2proxy import Peer2Proxy

@@ -36,7 +36,13 @@ class Disp2Visual_to(WebSocketServerProtocol):
                 height = (peer[0][1][1]-peer[0][0][1]), #/31.2,
                 bc_x = peer[1][0], # (peer[1][0]-3000)/25,
                 bc_y = peer[1][1], # (peer[1][1]-800)/31.2,
-                object_load = peer[2]
+
+                object_load = peer[2],
+                proxy_sent      = peer[3][0],
+                proxy_received  = peer[3][1],
+                disp_sent       = peer[3][2],
+                disp_received   = peer[3][3]
+
                 )
     
     def get_empty_report(self, _id, x,y):
@@ -82,7 +88,11 @@ class Disp2Visual_to_file():
                 height = (peer[0][1][1]-peer[0][0][1]), #/31.2,
                 bc_x = peer[1][0], # (peer[1][0]-3000)/25,
                 bc_y = peer[1][1], # (peer[1][1]-800)/31.2,
-                object_load = peer[2]
+                object_load = peer[2],
+                proxy_sent      = peer[3][0],
+                proxy_received  = peer[3][1],
+                disp_sent       = peer[3][2],
+                disp_received   = peer[3][3]
                 )
                             
     def updateData(self):
@@ -102,6 +112,8 @@ class Disp2Visual_from_file(WebSocketServerProtocol):
 #    def get_report(self, peer_host):
 #        peer = json.loads(self.in_file.readline())
 #        print peer
+
+
         
     def updateData(self):
         self.sendMessage(self.in_file.readline())
@@ -110,8 +122,19 @@ class Disp2Visual:
     def __init__(self, _disp):
         self.disp = _disp
         
-#        # to file, no visualiser
+
+        # to file, no visualiser
 #        Disp2Visual_to_file(_disp)
+#        return
+        
+#        # from file, only visual
+#        Disp2Visual_from_file.disp = _disp
+#        socketurl = 'ws://localhost:9997'
+#        factory = WebSocketServerFactory(socketurl)
+#        factory.protocol = Disp2Visual_from_file
+#        listenWS(factory)
+#        print "Websocket",socketurl,"ok ..."
+
 #        return
         
         # from file, only visual
@@ -123,11 +146,11 @@ class Disp2Visual:
         print "Websocket",socketurl,"ok ..."
         return
 #        
-#        # live, connect to monitor websocket
-#        Disp2Visual_to.disp = _disp
-#        socketurl = 'ws://localhost:9997'
-#        factory = WebSocketServerFactory(socketurl)
-#        factory.protocol = Disp2Visual_to
-#        listenWS(factory)
-#        print "Websocket",socketurl,"ok ..."
+        # live, connect to monitor websocket
+        Disp2Visual_to.disp = _disp
+        socketurl = 'ws://localhost:9997'
+        factory = WebSocketServerFactory(socketurl)
+        factory.protocol = Disp2Visual_to
+        listenWS(factory)
+        print "Websocket",socketurl,"ok ..."
         
