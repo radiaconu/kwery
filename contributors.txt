@@ -1,2 +1,6 @@
-Raluca Diaconu
-Mathieu Valero
+Author:
+  Raluca Diaconu
+
+Acknowledgements:
+  Mathieu Valero
+  Joaquin Keller
